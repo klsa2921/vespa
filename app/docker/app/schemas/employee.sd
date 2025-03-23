@@ -1,0 +1,55 @@
+schema employee {
+    document employee {
+        field empid type string {
+            indexing: summary | attribute
+            match: exact
+        }
+
+        field firstname type string {
+            indexing: summary | index
+        }
+
+        field lastname type string {
+            indexing: summary | index
+        }
+
+        field department type string {
+            indexing: summary | index
+            index: enable-bm25
+        }
+
+        field description type string {
+            indexing: summary | index
+            index: enable-bm25
+        }
+
+        field embedding type tensor<float>(d0[384]) {
+            indexing: attribute
+            attribute {
+                distance-metric: euclidean
+            }
+        }
+    }
+
+    fieldset default {
+        fields: firstname, lastname, description
+    }
+
+    rank-profile default {
+        first-phase {
+            expression: bm25(department) + bm25(description)
+        }
+    }
+
+    rank-profile semantic inherits default {
+        inputs {
+            query(query_embedding) tensor<float>(d0[384])
+        }
+        first-phase {
+            expression: closeness(embedding)
+        }
+        second-phase {
+            expression: bm25(department) + bm25(description) + 10 * closeness(embedding)
+        }
+    }
+}
