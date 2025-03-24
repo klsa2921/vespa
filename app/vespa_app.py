@@ -99,3 +99,6 @@ if __name__ == "__main__":
         embedding_precision="float",
         vespa_schema_path=VESPA_APPLICATION_SCHEMA_PATH  
     )
+
+# Reference 
+# https://github.com/onyx-dot-app/onyx/blob/main/backend/onyx/document_index/vespa
