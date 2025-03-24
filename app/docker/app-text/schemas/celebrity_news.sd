@@ -1,0 +1,61 @@
+schema celebrity_news {
+  "document": "celebrity_news",
+  "fields": {
+    "id": {
+      "type": "string",
+      "indexing": "summary | attribute",
+      "match": "exact"
+    },
+    "title": {
+      "type": "string",
+      "indexing": "summary | index"
+    },
+    "content": {
+      "type": "string",
+      "indexing": "summary | index",
+      "index": "enable-bm25"
+    },
+    "embedding": {
+      "type": "tensor<float>(d0[384])",
+      "indexing": "attribute",
+      "attribute": {
+        "distance-metric": "euclidean"
+      }
+    }
+  },
+
+  "fieldset": {
+    "default": {
+      "fields": ["title", "content"]
+    }
+  },
+
+  "rank-profile": {
+    "default": {
+      "first-phase": {
+        "expression": "bm25(title) + bm25(content)"
+      }
+    },
+    "semantic": {
+      "inherits": "default",
+      "inputs": {
+        "query_embedding": "tensor<float>(d0[384])"
+      },
+      "first-phase": {
+        "expression": "closeness(embedding)"
+      },
+      "second-phase": {
+        "expression": "bm25(title) + bm25(content) + 10 * closeness(embedding)"
+      }
+    }
+  },
+
+  "document-api": {
+    "version": "1.0"
+  },
+
+  "search": {
+    "version": "1.0"
+  }
+}
+

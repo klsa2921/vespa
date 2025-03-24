@@ -1,7 +1,7 @@
 import requests
 
 # Configuration
-VESPA_URL = "http://localhost:8080"  # Adjust this to your Vespa endpoint
+VESPA_URL = "http://localhost:8080"  
 SEARCH_ENDPOINT = f"{VESPA_URL}/search/"
 DOCUMENT_API_ENDPOINT = f"{VESPA_URL}/document/v1/employee/employee/docid/"
 
@@ -10,7 +10,7 @@ def get_all_employee_ids():
     yql = "select empid from sources employee where true"
     payload = {
         "yql": yql,
-        "hits": 1000  # Adjust if you have more than 1000 employees
+        "hits": 1000 
     }
     response = requests.post(SEARCH_ENDPOINT, json=payload, headers={"Content-Type": "application/json"})
     

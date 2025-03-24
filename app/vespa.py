@@ -3,10 +3,10 @@ import requests
 from sentence_transformers import SentenceTransformer
 
 # Configuration
-VESPA_URL = "http://localhost:8080"  # Adjust this to your Vespa endpoint
-JSONL_FILE = "employees.jsonl"       # Path to your JSONL file
+VESPA_URL = "http://localhost:8080" 
+JSONL_FILE = "employees.jsonl"       
 
-# Initialize the embedding model (using a small, fast model by default)
+# Initialize the embedding model 
 model = SentenceTransformer('all-MiniLM-L6-v2') # Produces 384-dimensional embeddings
 # model = SentenceTransformer('all-mpnet-base-v2')  # Produces 768-dimensional embeddings
 
@@ -24,13 +24,13 @@ def prepare_vespa_document(employee_data):
     document = {
         "put": f"id:employee:employee::{employee_data['empid']}",
         "fields": {
-            "empid": str(employee_data["empid"]),  # Convert to string as per schema
+            "empid": str(employee_data["empid"]), 
             "firstname": employee_data["firstname"],
             "lastname": employee_data["lastname"],
             "department": employee_data["department"],
             "description": employee_data["description"],
             "embedding": {
-                "values": embedding  # Tensor field expects a "values" key with list of floats
+                "values": embedding  
             }
         }
     }
@@ -59,6 +59,4 @@ def main():
                 print(f"Error processing line: {e}")
 
 if __name__ == "__main__":
-    # Install required packages if not already installed:
-    # pip install sentence-transformers requests
     main()
