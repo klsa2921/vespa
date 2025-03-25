@@ -1,0 +1,55 @@
+schema tv9_news2 {
+    document tv9_news2 {
+        field id type string {
+            indexing: summary | attribute
+            match: exact
+        }
+
+        field title type string {
+            indexing: summary | index
+        }
+
+        field content type string {
+            indexing: summary | index
+            index: enable-bm25
+        }
+
+        field embedding type tensor<float>(d0[384]) {
+            indexing: attribute
+            attribute {
+                distance-metric: euclidean
+            }
+        }
+    }
+
+    fieldset default {
+        fields: id, title, content
+    }
+
+    rank-profile default {
+        first-phase {
+            expression: bm25(title) + bm25(content)
+        }
+    }
+
+    rank-profile semantic inherits default {
+        inputs {
+            query(query_embedding) tensor<float>(d0[384])
+        }
+        first-phase {
+            expression: closeness(embedding)
+        }
+        second-phase {
+            expression: bm25(title) + bm25(content) + 10 * closeness(embedding)
+        }
+    }
+
+    rank-profile hybrid {
+        inputs {
+            query(query_embedding) tensor<float>(d0[384])
+        }
+        first-phase {
+            expression: bm25(title) + bm25(content) + 5 * closeness(embedding)
+        }
+    }
+}
