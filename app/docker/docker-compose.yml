@@ -1,12 +1,12 @@
 version: '3.8'
 
 services:
-  vespa:
-    image: vespaengine/vespa:latest
-    container_name: vespa
+  vespa-text:
+    image: docudive/vespa_index:v1.0.0.3
+    container_name: vespa-text
     ports:
-      - "8080:8080"    # HTTP API
-      - "19071:19071"  # Admin interface
+      - "19101:8080"    # HTTP API
+      - "19102:19071"  # Admin interface
     volumes:
       - ./app:/app
       - ./vespa-data:/opt/vespa/var
