@@ -58,7 +58,7 @@ def deploy_vespa_application(
         f"schemas/{index_name}.sd": schema_content,
     }
     zip_file = in_memory_zip_from_file_bytes(zip_dict)
-    
+
     # Deploy the application package
     headers = {"Content-Type": "application/zip"}
     response = requests.post(deploy_url, headers=headers, data=zip_file)
@@ -80,3 +80,4 @@ if __name__ == "__main__":
 
 # Reference 
 # https://github.com/onyx-dot-app/onyx/blob/main/backend/onyx/document_index/vespa
+# https://docs.vespa.ai/en/reference/validation-overrides.html
