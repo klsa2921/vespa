@@ -51,15 +51,3 @@ The schema provides three ranking profiles to support different search use cases
      - Boosts BM25 scores (2x) and semantic closeness (5x) for refined ranking.
    - Best for hybrid search combining keyword and semantic relevance.
 
-## Usage
-
-### Indexing Data
-- Store news articles with an `id`, `title`, `content`, and an optional `embedding` (e.g., generated from a model like BERT).
-- Example document:
-  ```json
-  {
-    "id": "news_001",
-    "title": "Celebrity X Wins Award",
-    "content": "Celebrity X received a prestigious award at the gala last night...",
-    "embedding": [0.12, -0.34, ..., 0.56] // 384 floats
-  }

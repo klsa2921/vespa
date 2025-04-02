@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 # VESPA_URL = "http://localhost:8080" 
 VESPA_URL = "http://192.168.1.27:2923" 
 JSONL_FILE = "employees.jsonl"       
-TEXT_JSONL_FILE = "app/data/test.jsonl"
+TEXT_JSONL_FILE = "app/data/test-search.jsonl"
 # Initialize the embedding model 
 model = SentenceTransformer('all-MiniLM-L6-v2') # Produces 384-dimensional embeddings
 # model = SentenceTransformer('all-mpnet-base-v2')  # Produces 768-dimensional embeddings

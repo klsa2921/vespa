@@ -51,5 +51,8 @@ schema celebrity_news {
         first-phase {
             expression: bm25(title) + bm25(content) + 5 * closeness(embedding)
         }
+        second-phase {
+            expression: 2 * bm25(title) + 2 * bm25(content) + 5 * closeness(embedding)
+        }
     }
 }

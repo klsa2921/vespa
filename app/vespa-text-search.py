@@ -67,7 +67,8 @@ def hybrid_search(query_text, hits=5):
     """Perform a hybrid search combining text and semantic search."""
     query_embedding = generate_query_embedding(query_text)
     # yql = f'select * from sources celebrity_news where userQuery() or ([{{"targetHits": {hits}}}]nearestNeighbor(embedding, query_embedding))'
-    yql = f'select * from sources celebrity_news where userQuery() and ([{{"targetHits": {hits}}}]nearestNeighbor(embedding, query_embedding))'
+    # yql = f'select * from sources celebrity_news where userQuery() and ([{{"targetHits": {hits}}}]nearestNeighbor(embedding, query_embedding))'
+    yql = f'select * from sources celebrity_news where userQuery() or ([{{"targetHits": {hits}}}]nearestNeighbor(embedding, query_embedding))'
     payload = {
         "yql": yql,
         "query": query_text,
@@ -78,21 +79,38 @@ def hybrid_search(query_text, hits=5):
     }
     return execute_search(payload)
 
-def main():
-    # Example text search
-    print("=== Text Search: 'heart condition' ===")
-    text_results = text_search("heart condition")
-    print_results(text_results)
-
-    # Example semantic search
-    print("=== Semantic Search: 'heart condition' ===")
-    semantic_results = semantic_search("heart condition")
-    print_results(semantic_results)
-
-    # Example hybrid search
-    print("=== Hybrid Search: 'heart issue' ===")
-    hybrid_results = hybrid_search("heart condition")
+def hybrid_search_main(query_text):
+    # query_text="little soreness"
+    print(f"=== Hybrid Search: '{query_text}' ===")
+    hybrid_results = hybrid_search(query_text)
     print_results(hybrid_results)
 
+def text_search_main(query_text):
+    # query_text="little soreness"
+    print(f"=== Text Search: '{query_text}' ===")
+    text_results = text_search(query_text)
+    print_results(text_results)
+
+def semantic_search_main(query_text):
+    # query_text="little soreness"
+    print(f"=== Semantic Search: '{query_text}' ===")
+    semantic_results = semantic_search(query_text)
+    print_results(semantic_results)
+
+# search_query_texts=["doctor prescribed paracetamol","How can I boost my immune system?","What is the difference between cold and flu?"]
+# search_query_texts=["What medicine should I take for body pain?","Why do kids get fevers?"]
+# search_query_texts=["antibiotics","antibiotics are used for?","medicine for Allergies"]
+search_query_texts=["minor discomfort","Vascular health","Oxygen delivery efficiency"]
 if __name__ == "__main__":
-    main()
+
+    for query_text in search_query_texts:
+        # print(f"=== Search Query: '{query_text}' ===")
+        print("\n")
+        text_search_main(query_text)
+        print("\n")
+        semantic_search_main(query_text)
+        print("\n")
+        hybrid_search_main(query_text)
+
+    # hybrid_search_main("doctor prescribed paracetamol")
+    

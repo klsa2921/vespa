@@ -6,26 +6,6 @@ VESPA_URL = "http://192.168.1.27:2923"
 SEARCH_ENDPOINT = f"{VESPA_URL}/search/"
 DOCUMENT_API_ENDPOINT = f"{VESPA_URL}/document/v1/celebrity_news/celebrity_news/docid/"
 
-def get_all_employee_ids():
-    """Retrieve all employee IDs from the index."""
-    yql = "select empid from sources employee where true"
-    payload = {
-        "yql": yql,
-        "hits": 1000 
-    }
-    response = requests.post(SEARCH_ENDPOINT, json=payload, headers={"Content-Type": "application/json"})
-    
-    if response.status_code != 200:
-        print(f"Failed to query employees: {response.text}")
-        return []
-    
-    results = response.json()
-    if "root" not in results or "children" not in results["root"]:
-        return []
-    
-    return [hit["fields"]["empid"] for hit in results["root"]["children"]]
-
-
 
 
 def delete_employee_by_id(empid):
@@ -38,20 +18,6 @@ def delete_employee_by_id(empid):
         return False
     return True
 
-def delete_all_employees():
-    """Delete all employee documents from the Vespa index."""
-    employee_ids = get_all_employee_ids()
-    
-    if not employee_ids:
-        print("No employees found in the index.")
-        return
-    
-    print(f"Found {len(employee_ids)} employees to delete.")
-    
-    for empid in employee_ids:
-        delete_employee_by_id(empid)
-    
-    print("All employees deletion process completed.")
 
 def delete_all_text():
     """Delete all employee documents from the Vespa index."""
@@ -69,7 +35,6 @@ def delete_all_text():
     print("All employees deletion process completed.")
 
 def main():
-    # delete_all_employees()
     delete_all_text()
 
 
@@ -78,12 +43,12 @@ def get_all_text_ids():
     yql = "select id from sources celebrity_news where true"
     payload = {
         "yql": yql,
-        "hits": 1000 
+        "hits": 50 
     }
     response = requests.post(SEARCH_ENDPOINT, json=payload, headers={"Content-Type": "application/json"})
     
     if response.status_code != 200:
-        print(f"Failed to query employees: {response.text}")
+        print(f"Failed to query texts: {response.text}")
         return []
     
     results = response.json()
@@ -91,8 +56,6 @@ def get_all_text_ids():
         return []
     
     return [hit["fields"]["id"] for hit in results["root"]["children"]]
-
-
 
 
 if __name__ == "__main__":
