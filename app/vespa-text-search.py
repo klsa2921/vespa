@@ -100,12 +100,13 @@ def semantic_search_main(query_text):
 # search_query_texts=["doctor prescribed paracetamol","How can I boost my immune system?","What is the difference between cold and flu?"]
 # search_query_texts=["What medicine should I take for body pain?","Why do kids get fevers?"]
 # search_query_texts=["antibiotics","antibiotics are used for?","medicine for Allergies"]
+
 search_query_texts=["minor discomfort","Vascular health","Oxygen delivery efficiency"]
+
 if __name__ == "__main__":
 
     for query_text in search_query_texts:
         # print(f"=== Search Query: '{query_text}' ===")
-        print("\n")
         text_search_main(query_text)
         print("\n")
         semantic_search_main(query_text)
