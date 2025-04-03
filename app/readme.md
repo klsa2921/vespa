@@ -1,4 +1,4 @@
-# Celebrity News Schema
+# Vespa Schema
 
 This document describes the `celebrity_news` schema, designed for storing and searching celebrity-related news articles. The schema supports both traditional text-based search (using BM25 ranking) and semantic search (using embeddings), with hybrid options for combining both approaches.
 
