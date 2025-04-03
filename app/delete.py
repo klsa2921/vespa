@@ -43,7 +43,7 @@ def get_all_text_ids():
     yql = "select id from sources celebrity_news where true"
     payload = {
         "yql": yql,
-        "hits": 50 
+        "hits": 400
     }
     response = requests.post(SEARCH_ENDPOINT, json=payload, headers={"Content-Type": "application/json"})
     

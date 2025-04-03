@@ -1,7 +1,7 @@
 import json
 import requests
 from sentence_transformers import SentenceTransformer
-
+import csv
 # Configuration
 # VESPA_URL = "http://localhost:8080" 
 VESPA_URL = "http://192.168.1.27:2923" 
@@ -99,6 +99,17 @@ def main_text():
                 send_text_document_vespa(vespa_doc)
             except Exception as e:
                 print(f"Error processing line: {e}")
+
+def ingest_csv(csv_file):
+    with open(csv_file, mode='r', encoding='utf-8', errors='ignore') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            try:
+                vespa_doc = prepare_despa_document_text(row)  
+                send_text_document_vespa(vespa_doc)
+            except Exception as e:
+                print(f"Error processing row: {e}")
+
 
 if __name__ == "__main__":
     main_text()

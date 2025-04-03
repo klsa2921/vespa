@@ -28,7 +28,7 @@ schema celebrity_news {
 
     rank-profile default {
         first-phase {
-            expression: 5 * bm25(title) + 5 * bm25(content)
+            expression: bm25(title) + bm25(content)
         }
     }
 
@@ -36,27 +36,23 @@ schema celebrity_news {
         inputs {
             query(query_embedding) tensor<float>(d0[384])
         }
-
         first-phase {
-            expression: 10 * closeness(embedding)
+            expression: closeness(embedding)
         }
-
         second-phase {
-            expression: 2.5 * bm25(title) + 2.5 * bm25(content) + 10 * closeness(embedding)
+            expression: bm25(title) + bm25(content) + 10 * closeness(embedding)
         }
     }
 
-    rank-profile hybrid inherits default {
+    rank-profile hybrid {
         inputs {
             query(query_embedding) tensor<float>(d0[384])
         }
-
         first-phase {
-            expression: 2.5 * bm25(title) + 2.5 * bm25(content) + 5 * closeness(embedding)
+            expression: bm25(title) + bm25(content) + closeness(embedding)
         }
-
         second-phase {
-            expression: 2 * bm25(title) + 2 * bm25(content) + 6 * closeness(embedding)
+            expression: 2 * bm25(title) + 2 * bm25(content) + 5 * closeness(embedding)
         }
     }
 }

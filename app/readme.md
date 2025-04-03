@@ -36,7 +36,7 @@ The schema provides three ranking profiles to support different search use cases
    - **First Phase**: `closeness(embedding)`
      - Ranks documents based on the Euclidean distance between the query embedding and document embedding.
    - **Second Phase**: `bm25(title) + bm25(content) + 10 * closeness(embedding)`
-     - Combines BM25 text scoring with semantic similarity (weighted 10x for embeddings).
+     - Combines BM25 text scoring with semantic similarity (weighted 10x for embeddings). In second phase results 
    - Ideal for semantic search with some text relevance.
 
 3. **`hybrid`**
@@ -50,7 +50,8 @@ The schema provides three ranking profiles to support different search use cases
 ## Field Indexing Terms
 - **`summary`**: Indicates the field is included in a summary of the document, typically for quick retrieval or display.
 - **`index`**: Marks the field as searchable, enabling it to be queried using text-based search algorithms like BM25.
-- **`attribute`**: Denotes the field is stored as a raw value for exact matching or fast retrieval, often used for filtering or semantic operations.
+- **`attribute`**: Denotes the field is stored as a raw value for exact matching or fast retrieval, often used for filtering or semantic operations. And fields are stored in memory for fast retriveal.
 - **`enable-bm25`**: Activates BM25 ranking for the field, a scoring algorithm that ranks documents based on term frequency and document length.
 - **`exact`**: Specifies that matching on this field requires an exact string match, without partial or fuzzy matching.
 - **`euclidean`**: Refers to the Euclidean distance metric used to measure similarity between embeddings in semantic search.
+

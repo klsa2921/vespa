@@ -55,7 +55,8 @@ def print_results(results):
     if not results or "root" not in results or "children" not in results["root"]:
         print("No results found.")
         return
-
+    # print("\nSearch Results:")
+    # print(results.get("root", {}).get("children", []))  # Print the raw children for debugging
     for hit in results["root"]["children"]:
         fields = hit["fields"]
         print(f"\nNews ID: {fields['id']}")
@@ -81,21 +82,24 @@ def hybrid_search(query_text, hits=5):
 
 def hybrid_search_main(query_text):
     # query_text="little soreness"
-    print(f"=== Hybrid Search: '{query_text}' ===")
+    # print(f"=== Hybrid Search: '{query_text}' ===")
     hybrid_results = hybrid_search(query_text)
-    print_results(hybrid_results)
+    # print_results(hybrid_results)
+    return hybrid_results
 
 def text_search_main(query_text):
     # query_text="little soreness"
-    print(f"=== Text Search: '{query_text}' ===")
+    # print(f"=== Text Search: '{query_text}' ===")
     text_results = text_search(query_text)
-    print_results(text_results)
+    # print_results(text_results)
+    return text_results
 
 def semantic_search_main(query_text):
     # query_text="little soreness"
-    print(f"=== Semantic Search: '{query_text}' ===")
+    # print(f"=== Semantic Search: '{query_text}' ===")
     semantic_results = semantic_search(query_text)
-    print_results(semantic_results)
+    # print_results(semantic_results)
+    return semantic_results
 
 # search_query_texts=["doctor prescribed paracetamol","How can I boost my immune system?","What is the difference between cold and flu?"]
 # search_query_texts=["What medicine should I take for body pain?","Why do kids get fevers?"]
@@ -115,3 +119,48 @@ if __name__ == "__main__":
 
     # hybrid_search_main("doctor prescribed paracetamol")
     
+def search_api(ranking_profiles, query):
+    results = {}
+    totalHits={}
+    for ranking_profile in ranking_profiles:
+        if ranking_profile == "similarity":
+
+            data=text_search_main(query)
+            similarity_results = data.get("root", {}).get("children", [])
+
+            total_hits=data.get("root", {}).get("fields", {}).get("totalCount",0) 
+            totalHits[ranking_profile] = total_hits  
+
+            if not similarity_results:  
+                results["similarity"] = "No results found"
+            else:
+                results["similarity"] = similarity_results
+
+        elif ranking_profile == "semantic":
+            data=semantic_search_main(query)  
+            semantic_results = data.get("root", {}).get("children", [])
+
+            total_hits=data.get("root", {}).get("fields", {}).get("totalCount",0)
+            totalHits[ranking_profile] = total_hits
+
+            if not semantic_results:
+                results["semantic"] = "No results found"
+            else:
+                results["semantic"] = semantic_results
+
+        elif ranking_profile == "hybrid":
+
+            data=hybrid_search_main(query)
+            hybrid_results = data.get("root", {}).get("children", [])
+
+            total_hits=data.get("root", {}).get("fields", {}).get("totalCount",0) 
+            totalHits[ranking_profile] = total_hits
+
+            if not hybrid_results:
+                results["hybrid"] = "No results found"
+            else:
+                results["hybrid"] = hybrid_results
+
+    # results["totalHits"] = totalHits
+    # print(f"Final Search Results for query '{query}': {results}")
+    return results,totalHits
