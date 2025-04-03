@@ -64,7 +64,10 @@ To run the application, ensure the following dependencies are installed:
 - **NumPy**: For numerical operations, including handling embeddings.
 - **Pandas**: For data manipulation and CSV file handling.
 - **Vespa**: For interacting with the Vespa engine.
-
+- **Requests**: For making HTTP requests.
+- **Sentence-Transformers**: For generating and working with embeddings.
+- **FastAPI**: A modern, fast web framework for building APIs.
+- **Uvicorn**: A lightning-fast ASGI server for running FastAPI applications.
 
 You can install the dependencies using the following command:
 
