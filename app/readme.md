@@ -55,3 +55,48 @@ The schema provides three ranking profiles to support different search use cases
 - **`exact`**: Specifies that matching on this field requires an exact string match, without partial or fuzzy matching.
 - **`euclidean`**: Refers to the Euclidean distance metric used to measure similarity between embeddings in semantic search.
 
+## Dependencies
+
+To run the application, ensure the following dependencies are installed:
+
+- **Python**: Version 3.8 or higher.
+- **Flask**: A lightweight WSGI web application framework.
+- **NumPy**: For numerical operations, including handling embeddings.
+- **Pandas**: For data manipulation and CSV file handling.
+- **Vespa**: For interacting with the Vespa engine.
+
+
+You can install the dependencies using the following command:
+
+```bash
+pip install -r requirements.txt
+```
+
+
+## Running the Application
+
+To start the application, navigate to the `app/` directory and run the following command in your terminal:
+
+```bash
+python app.py
+```
+
+Ensure that all dependencies are installed and the required environment variables are configured before starting the application.
+
+
+## Ingestion Data
+
+The schema supports data ingestion through CSV files. From the web page, you can upload only CSV files. Each CSV file must contain the following fields:
+
+- **`id`**: A unique identifier for the data.
+- **`title`**: The title of the data.
+- **`content`**: The full text content .
+
+Ensure that the CSV file adheres to this structure for successful ingestion.
+
+## Local Access
+When running the application locally, it can be accessed at the following port:
+
+- **Port**: `5000`
+
+Ensure that your local environment is configured to allow access to this port.
