@@ -79,7 +79,8 @@ def deploy_vespa_application(
 
 
 if __name__ == "__main__":
-    index_names = ["tv9_news","tv9_news2", "celebrity_news"]
+    # index_names = ["tv9_news","tv9_news2", "celebrity_news"]
+    index_names = ["celebrity_news"]
     deploy_vespa_application(
         index_names=index_names,
         vespa_schema_path=VESPA_APPLICATION_SCHEMA_PATH,

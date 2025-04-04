@@ -26,7 +26,7 @@ def text_search(query_text, hits=5):
     }
     return execute_search(payload)
 
-def semantic_search(query_text, hits=5):
+def semantic_search(query_text, username,hits=5):
     """Perform a semantic search using embedding similarity."""
     query_embedding = generate_query_embedding(query_text)
     yql = f'select * from sources celebrity_news where ([{{"targetHits": {hits}}}]nearestNeighbor(embedding, query_embedding))'
@@ -87,10 +87,10 @@ def hybrid_search_main(query_text):
     # print_results(hybrid_results)
     return hybrid_results
 
-def text_search_main(query_text):
+def text_search_main(query_text,username):
     # query_text="little soreness"
     # print(f"=== Text Search: '{query_text}' ===")
-    text_results = text_search(query_text)
+    text_results = text_search(query_text,username)
     # print_results(text_results)
     return text_results
 
@@ -119,13 +119,13 @@ if __name__ == "__main__":
 
     # hybrid_search_main("doctor prescribed paracetamol")
     
-def search_api(ranking_profiles, query):
+def search_api(ranking_profiles, query,username="anonymous"):
     results = {}
     totalHits={}
     for ranking_profile in ranking_profiles:
         if ranking_profile == "similarity":
 
-            data=text_search_main(query)
+            data=text_search(query,username)
             similarity_results = data.get("root", {}).get("children", [])
 
             total_hits=data.get("root", {}).get("fields", {}).get("totalCount",0) 
@@ -137,7 +137,7 @@ def search_api(ranking_profiles, query):
                 results["similarity"] = similarity_results
 
         elif ranking_profile == "semantic":
-            data=semantic_search_main(query)  
+            data=semantic_search(query,username)  
             semantic_results = data.get("root", {}).get("children", [])
 
             total_hits=data.get("root", {}).get("fields", {}).get("totalCount",0)
@@ -150,7 +150,7 @@ def search_api(ranking_profiles, query):
 
         elif ranking_profile == "hybrid":
 
-            data=hybrid_search_main(query)
+            data=hybrid_search(query,username)
             hybrid_results = data.get("root", {}).get("children", [])
 
             total_hits=data.get("root", {}).get("fields", {}).get("totalCount",0) 

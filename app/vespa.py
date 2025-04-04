@@ -47,6 +47,7 @@ def prepare_despa_document_text(text_data):
         "put": f"id:celebrity_news:celebrity_news::{text_data['id']}",
         "fields": {
             "id": str(text_data["id"]), 
+            "user_id": text_data.get("username", "anonymous"),
             "title": text_data["title"],
             "content": text_data["content"],
             "embedding": {
@@ -100,12 +101,12 @@ def main_text():
             except Exception as e:
                 print(f"Error processing line: {e}")
 
-def ingest_csv(csv_file):
+def ingest_csv(csv_file,username):
     with open(csv_file, mode='r', encoding='utf-8', errors='ignore') as file:
         reader = csv.DictReader(file)
         for row in reader:
             try:
-                vespa_doc = prepare_despa_document_text(row)  
+                vespa_doc = prepare_despa_document_text(row,username)  
                 send_text_document_vespa(vespa_doc)
             except Exception as e:
                 print(f"Error processing row: {e}")
