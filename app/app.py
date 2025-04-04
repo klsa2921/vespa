@@ -1,14 +1,14 @@
 import os
-from fastapi import FastAPI, File,Request
+from fastapi import FastAPI, File, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-
+from vespa_index import ingest_text_data, ingest_csv
 from vespa_search import search_api
 import uvicorn
 from fastapi import UploadFile, Form
 from pathlib import Path
-from vespa_index import ingest_csv
 from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 
 app.add_middleware(
@@ -19,11 +19,12 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-
 # Mount the "web" folder to serve static files
 app.mount("/static", StaticFiles(directory="C:/Users/mmallikanti/Documents/GitHub/vespa/app/web/"), name="static")
 
-options=["similarity","semantic","hybrid"]
+options = ["similarity", "semantic", "hybrid"]
+
+
 @app.get("/ranking_profiles")
 async def get_options():
     # Return the options as a JSON response
@@ -31,10 +32,12 @@ async def get_options():
     return formatted_options
     # return {"options": options}
 
+
 @app.get("/")
 async def root():
     # Serve the index.html file (React frontend)
     return FileResponse("C:/Users/mmallikanti/Documents/GitHub/vespa/app/web/index.html")
+
 
 @app.post("/search")
 async def submit_data(data: Request):
@@ -42,26 +45,49 @@ async def submit_data(data: Request):
     body = await data.json()
     ranking_profiles = body.get("ranking_profiles")
     query = body.get("query")
-    username = body.get("username")  
-    search_results,totalHits = search_api(ranking_profiles, query,username)  
+    username = body.get("username")
+    search_results, totalHits = search_api(ranking_profiles, query, username)
     # print(f"Received ranking profiles: {ranking_profiles} and query: {query}")
     # print(f"Search results: {search_results}")
 
     # Return the response
-    return {"message": "Data received successfully", "data": search_results,"totalHits":totalHits}
+    return {"message": "Data received successfully", "data": search_results, "totalHits": totalHits}
 
-@app.post("/upload")
-async def upload_file(file: UploadFile = File(...), username: str = Form(...)):
+
+@app.post("/uploadCSV")
+async def upload_csv_file(file: UploadFile = File(...), username: str = Form(...)):
     upload_dir = Path("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/")
     upload_dir.mkdir(parents=True, exist_ok=True)
     file_path = upload_dir / file.filename
-    
+
     with file_path.open("wb") as f:
         f.write(await file.read())
-    
-    ingest_csv(file_path,username)  
-    
+
+    ingest_csv(file_path, username)
+
     return {"filename": file.filename, "message": "File uploaded and processed successfully"}
+
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...), username: str = Form(...)):
+    try:
+        upload_dir = Path("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/")
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        file_path = upload_dir / file.filename
+        chunks = []  # Initialize chunks in case we need to process the file content
+        with file_path.open("wb") as f:
+            f.write(await file.read())
+
+        if file.filename.endswith('.csv'):
+            ingest_csv(file_path, username)
+        else:
+            chunks = ingest_text_data(file_path, username)
+        if chunks:
+            # If chunks were generated, return them in the response for confirmation
+            return {"filename": file.filename, "message": "File uploaded and processed successfully", "chunks": chunks}
+        return {"filename": file.filename, "message": "File uploaded and processed successfully"}
+    except Exception as e:
+        return {"error": str(e), "message": "An error occurred while processing the file"}
 
 
 if __name__ == "__main__":

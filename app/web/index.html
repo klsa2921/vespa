@@ -35,15 +35,15 @@
             transition: all 0.3s ease;
             border-radius: 5px;
         }
-        
+
         .menu-item.logout {
-            margin-left: auto; 
-        } 
+            margin-left: auto;
+        }
 
         .menu-item.logout button {
             padding: 5px 10px;
             cursor: pointer;
-        }     
+        }
 
         .menu-item:hover {
             background-color: #8ca01c;
@@ -56,10 +56,11 @@
         }
 
         .menu-item.active {
-            background-color: #007bff; 
-            color: white; 
-            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2); 
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
         }
+
         .form-container {
             background-color: white;
             padding: 20px;
@@ -73,6 +74,20 @@
             flex-wrap: wrap;
             gap: 20px;
             margin-bottom: 20px;
+        }
+        
+        .chunks-preview {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+
+        .chunk-item {
+            margin: 5px 0;
+            padding: 5px;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
         }
 
         .checkbox-label {
@@ -197,290 +212,317 @@
     </style>
 </head>
 <body>
-  <div id="root"></div>
+<div id="root"></div>
 
-  <script type="text/babel">
+<script type="text/babel">
     const App = () => {
-      const [currentTab, setCurrentTab] = React.useState('index');
-      const [file, setFile] = React.useState(null);
-      const [fileName, setFileName] = React.useState('');
-      const [responseMessage, setResponseMessage] = React.useState('');
-      const [selectedOptions, setSelectedOptions] = React.useState([]);
-      const [inputValue, setInputValue] = React.useState('');
-      const [responseData, setResponseData] = React.useState(null);
-      const [options, setOptions] = React.useState([]);
-      const [loading, setLoading] = React.useState(true);
-      const [error, setError] = React.useState(null);
-      const [username, setUsername] = React.useState('');
-      const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-      
-      const handleTabChange = (tab) => {
-        if (isLoggedIn) {
-          setCurrentTab(tab);
-          if (tab === 'index') {
-            setResponseData(null);
-          }
-        }
-      };
+        const { useState, useEffect } = React;
+        const [currentTab, setCurrentTab] = useState('index');
+        const [file, setFile] = useState(null);
+        const [fileName, setFileName] = useState('');
+        const [responseMessage, setResponseMessage] = useState('');
+        const [selectedOptions, setSelectedOptions] = useState([]);
+        const [inputValue, setInputValue] = useState('');
+        const [responseData, setResponseData] = useState(null);
+        const [options, setOptions] = useState([]);
+        const [loading, setLoading] = useState(true);
+        const [error, setError] = useState(null);
+        const [username, setUsername] = useState('');
+        const [isLoggedIn, setIsLoggedIn] = useState(false);
+        const [chunks, setChunks] = useState([]);
+        const [showPreview, setShowPreview] = useState(false);
 
-      const handleLogin = () => {
-        if (username.trim()) {
-          setIsLoggedIn(true);
-        } else {
-          alert('Please enter a username');
-        }
-      };
-
-      const handleLogout = () => {
-        setIsLoggedIn(false);
-        setUsername('');
-        setCurrentTab('index');
-        setResponseData(null);
-        setFile(null);
-        setFileName('');
-        setResponseMessage('');
-        setSelectedOptions([]);
-        setInputValue('');
-      };
-
-      const handleUsernameChange = (e) => {
-        setUsername(e.target.value);
-      };
-
-      const handleKeyPress = (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          handleLogin();
-        }
-      };
-
-      const handleFileUpload = (event) => {
-        const uploadedFile = event.target.files[0];
-        if (uploadedFile) {
-          setFile(uploadedFile);
-          setFileName(uploadedFile.name);
-        }
-      };
-
-      const removeFile = () => {
-        setFile(null);
-        setFileName('');
-        setResponseMessage('');
-      };
-
-      const sendFileToAPI = async () => {
-        if (!file) {
-          alert('No file selected!');
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('description', 'Your description text');
-        formData.append('username', username);
-        try {
-          const response = await fetch('http://localhost:5000/upload', {
-            method: 'POST',
-            body: formData,
-          });
-
-          const result = await response.json();
-          if (response.ok) {
-            setResponseMessage(result.message);
-          } else {
-            setResponseMessage(result.message || 'Error uploading file.');
-          }
-        } catch (error) {
-          setResponseMessage('Error uploading file.');
-        }
-      };
-
-      const handleOptionChange = (e) => {
-        const value = e.target.value;
-        setSelectedOptions((prev) =>
-          prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
-        );
-      };
-
-      const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (selectedOptions.length === 0) {
-          alert('Please select at least one option.');
-          return;
-        }
-
-        try {
-          const response = await fetch('http://localhost:5000/search', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ranking_profiles: selectedOptions, query: inputValue, username: username}),
-          });
-          const data = await response.json();
-          setResponseData(data);
-        } catch (error) {
-          setError('An error occurred while submitting the form.');
-        }
-      };
-
-      React.useEffect(() => {
-        if (currentTab === 'search' && isLoggedIn) {
-          const fetchOptions = async () => {
-            try {
-              const response = await fetch('http://localhost:5000/ranking_profiles', {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-              });
-              if (!response.ok) {
-                throw new Error('Failed to fetch options');
-              }
-              const data = await response.json();
-              setOptions(data);
-              setLoading(false);
-            } catch (err) {
-              setError(err.message);
-              setLoading(false);
+        const handleTabChange = (tab) => {
+            if (isLoggedIn) {
+                setCurrentTab(tab);
+                if (tab === 'index') {
+                    setResponseData(null);
+                }
             }
-          };
-          fetchOptions();
+        };
+
+        const handleLogin = () => {
+            if (username.trim()) {
+                setIsLoggedIn(true);
+            } else {
+                alert('Please enter a username');
+            }
+        };
+
+        const handleLogout = () => {
+            setIsLoggedIn(false);
+            setUsername('');
+            setCurrentTab('index');
+            setResponseData(null);
+            setFile(null);
+            setFileName('');
+            setResponseMessage('');
+            setSelectedOptions([]);
+            setInputValue('');
+        };
+
+        const handleUsernameChange = (e) => {
+            setUsername(e.target.value);
+        };
+
+        const handleKeyPress = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleLogin();
+            }
+        };
+
+        const handleFileUpload = (event) => {
+            const uploadedFile = event.target.files[0];
+            if (uploadedFile) {
+                setFile(uploadedFile);
+                setFileName(uploadedFile.name);
+            }
+        };
+
+        const removeFile = () => {
+            setFile(null);
+            setFileName('');
+            setResponseMessage('');
+        };
+
+        const sendFileToAPI = async () => {
+            if (!file) {
+                alert('No file selected!');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('description', 'Your description text');
+            formData.append('username', username);
+            try {
+                const response = await fetch('http://localhost:5000/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    setResponseMessage(result.message);
+                    if (result.chunks) {
+                        setChunks(result.chunks);
+                        setShowPreview(false);
+                    } else {
+                        setShowPreview(false);
+                    }
+                } else {
+                    setResponseMessage(result.message || 'Error uploading file.');
+                }
+            } catch (error) {
+                setResponseMessage('Error uploading file.');
+            }
+        };
+
+        const handleOptionChange = (e) => {
+            const value = e.target.value;
+            setSelectedOptions((prev) =>
+                prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
+            );
+        };
+
+        const handleSubmit = async (e) => {
+            e.preventDefault();
+            if (selectedOptions.length === 0) {
+                alert('Please select at least one option.');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/search', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ranking_profiles: selectedOptions, query: inputValue, username: username}),
+                });
+                const data = await response.json();
+                setResponseData(data);
+            } catch (error) {
+                setError('An error occurred while submitting the form.');
+            }
+        };
+
+        React.useEffect(() => {
+            if (currentTab === 'search' && isLoggedIn) {
+                const fetchOptions = async () => {
+                    try {
+                        const response = await fetch('http://localhost:5000/ranking_profiles', {
+                            method: 'GET',
+                            headers: {'Content-Type': 'application/json'},
+                        });
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch options');
+                        }
+                        const data = await response.json();
+                        setOptions(data);
+                        setLoading(false);
+                    } catch (err) {
+                        setError(err.message);
+                        setLoading(false);
+                    }
+                };
+                fetchOptions();
+            }
+        }, [currentTab, isLoggedIn]);
+
+        if (!isLoggedIn) {
+            return (
+                <div className="login-container">
+                    <h2>Please Enter Username</h2>
+                    <input
+                        type="text"
+                        value={username}
+                        onChange={handleUsernameChange}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Enter your username"
+                    />
+                    <button onClick={handleLogin}>Login</button>
+                </div>
+            );
         }
-      }, [currentTab, isLoggedIn]);
 
-      if (!isLoggedIn) {
         return (
-          <div className="login-container">
-            <h2>Please Enter Username</h2>
-            <input
-              type="text"
-              value={username}
-              onChange={handleUsernameChange}
-              onKeyPress={handleKeyPress}
-              placeholder="Enter your username"
-            />
-            <button onClick={handleLogin}>Login</button>
-          </div>
-        );
-      }
-
-      return (
-        <div>
-          <div className="menu-bar">
-            <div
-              className={`menu-item ${currentTab === 'index' ? 'active' : ''}`}
-              onClick={() => handleTabChange('index')}
-            >
-              Index
-            </div>
-            <div
-              className={`menu-item ${currentTab === 'search' ? 'active' : ''}`}
-              onClick={() => handleTabChange('search')}
-            >
-              Search
-            </div>
-            <div className="menu-item logout">
-              <button onClick={handleLogout}>Logout</button>
-            </div>
-          </div>
-
-          {currentTab === 'index' && (
-            <div className="form-container">
-              <h3>Upload CSV File</h3>
-              <div className="upload-container">
-                <label className="upload-icon" htmlFor="file-input">
-                  📁
-                </label>
-                <input
-                  id="file-input"
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileUpload}
-                />
-                {fileName && (
-                  <div className="file-info">
-                    <span>{fileName}</span>
-                    <button onClick={removeFile}>Remove</button>
-                  </div>
-                )}
-              </div>
-              <div className="upload-button-container">
-                <button onClick={sendFileToAPI}>Index data</button>
-                {responseMessage && <span>{responseMessage}</span>}
-              </div>
-            </div>
-          )}
-
-          {currentTab === 'search' && (
-            <form onSubmit={handleSubmit} className="form-container">
-              {loading && <div className="loading-message">Loading options...</div>}
-              {error && <div className="error-message">Error: {error}</div>}
-              {!loading && !error && (
-                <div className="checkbox-group">
-                  {options.map((option) => (
-                    <label key={option.value} className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        value={option.value}
-                        onChange={handleOptionChange}
-                        checked={selectedOptions.includes(option.value)}
-                      />
-                      {option.label}
-                    </label>
-                  ))}
+            <div>
+                <div className="menu-bar">
+                    <div
+                        className={`menu-item ${currentTab === 'index' ? 'active' : ''}`}
+                        onClick={() => handleTabChange('index')}
+                    >
+                        Index
+                    </div>
+                    <div
+                        className={`menu-item ${currentTab === 'search' ? 'active' : ''}`}
+                        onClick={() => handleTabChange('search')}
+                    >
+                        Search
+                    </div>
+                    <div className="menu-item logout">
+                        <button onClick={handleLogout}>Logout</button>
+                    </div>
                 </div>
-              )}
-              <div>
-                <label>Search Query:</label>
-                <input
-                  type="text"
-                  placeholder="Enter your search query"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                />
-              </div>
-              <button type="submit" disabled={loading || error}>
-                Submit
-              </button>
-            </form>
-          )}
 
-          {currentTab === 'search' && responseData && responseData.data && (
-            <div className="results-container">
-              {Object.keys(responseData.data).map((option) => (
-                <div key={option} className="result-card">
-                  <h3>{option}</h3>
-                  <h4>totalhits:-{responseData.totalHits[option]}</h4>
-                  {Array.isArray(responseData.data[option]) ? (
-                    responseData.data[option].map((item, index) => (
-                      <div key={index} className="result-item bordered-box">
-                        {Object.entries(item).map(([key, value]) => (
-                          <div key={key}>
-                            <strong>{key}:</strong>{' '}
-                            {typeof value === 'object' ? (
-                              <ul style={{ paddingLeft: '15px', margin: 0 }}>
-                                {Object.entries(value).map(([subKey, subValue]) => (
-                                  <li key={subKey}>
-                                    <strong>{subKey}:</strong> {subValue}
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              value
+                {currentTab === 'index' && (
+                    <div className="form-container">
+                        <h3>Upload File</h3>
+                        <div className="upload-container">
+                            <label className="upload-icon" htmlFor="file-input">
+                                📁
+                            </label>
+                            <input
+                                id="file-input"
+                                type="file"
+                                accept="*/*"
+                                onChange={handleFileUpload}
+                            />
+                            {fileName && (
+                                <div className="file-info">
+                                    <span>{fileName}</span>
+                                    <button onClick={removeFile}>Remove</button>
+                                </div>
                             )}
-                          </div>
+                        </div>
+                        <div className="upload-button-container">
+                            <button onClick={sendFileToAPI}>Index data</button>
+                            {responseMessage && <span>{responseMessage}</span>}
+                        </div>
+                        {/* Display the preview button if chunks are available */}
+                        {chunks.length > 0 && (
+                            <button onClick={() => setShowPreview(!showPreview)}>Toggle Preview</button>
+                        )}
+
+                        {/* Display the chunks below the upload form when preview is toggled */}
+                        {showPreview && chunks.length > 0 && (
+                            <div className="chunks-preview">
+                                <h4>Chunks Preview:</h4>
+                                <div>
+                                    {chunks.map((chunk, index) => (
+                                        <div key={index} className="chunk-item">
+                                            <span>{chunk}</span> {/* Display chunk content here */}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {currentTab === 'search' && (
+                    <form onSubmit={handleSubmit} className="form-container">
+                        {loading && <div className="loading-message">Loading options...</div>}
+                        {error && <div className="error-message">Error: {error}</div>}
+                        {!loading && !error && (
+                            <div className="checkbox-group">
+                                {options.map((option) => (
+                                    <label key={option.value} className="checkbox-label">
+                                        <input
+                                            type="checkbox"
+                                            value={option.value}
+                                            onChange={handleOptionChange}
+                                            checked={selectedOptions.includes(option.value)}
+                                        />
+                                        {option.label}
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                        <div>
+                            <label>Search Query:</label>
+                            <input
+                                type="text"
+                                placeholder="Enter your search query"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                            />
+                        </div>
+                        <button type="submit" disabled={loading || error}>
+                            Submit
+                        </button>
+                    </form>
+                )}
+
+                {currentTab === 'search' && responseData && responseData.data && (
+                    <div className="results-container">
+                        {Object.keys(responseData.data).map((option) => (
+                            <div key={option} className="result-card">
+                                <h3>{option}</h3>
+                                <h4>totalhits:-{responseData.totalHits[option]}</h4>
+                                {Array.isArray(responseData.data[option]) ? (
+                                    responseData.data[option].map((item, index) => (
+                                        <div key={index} className="result-item bordered-box">
+                                            {Object.entries(item).map(([key, value]) => (
+                                                <div key={key}>
+                                                    <strong>{key}:</strong>{' '}
+                                                    {typeof value === 'object' ? (
+                                                        <ul style={{paddingLeft: '15px', margin: 0}}>
+                                                            {Object.entries(value).map(([subKey, subValue]) => (
+                                                                <li key={subKey}>
+                                                                    <strong>{subKey}:</strong> {subValue}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    ) : (
+                                                        value
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p>{responseData.data[option]}</p>
+                                )}
+                            </div>
                         ))}
-                      </div>
-                    ))
-                  ) : (
-                    <p>{responseData.data[option]}</p>
-                  )}
-                </div>
-              ))}
+                    </div>
+                )}
             </div>
-          )}
-        </div>
-      );
+        );
     };
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
 </body>
 </html>

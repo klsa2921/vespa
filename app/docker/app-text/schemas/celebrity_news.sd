@@ -9,15 +9,17 @@ schema celebrity_news {
             indexing: summary | index
         }
 
+        field content type string {
+            indexing: summary | index
+            index: enable-bm25
+        }
+        
         field username type string {
             indexing: attribute | summary
             attribute: fast-search
         }
 
-        field content type string {
-            indexing: summary | index
-            index: enable-bm25
-        }
+       
 
         field embedding type tensor<float>(d0[384]) {
             indexing: attribute
@@ -64,4 +66,5 @@ schema celebrity_news {
             expression: 2 * bm25(title) + 2 * bm25(content) + 6 * closeness(embedding)
         }
     }
+
 }

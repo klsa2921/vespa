@@ -6,11 +6,10 @@ from datetime import datetime, timedelta
 
 import requests  # pip install requests
 
-
 logger = logging.getLogger(__name__)
 
-VESPA_APPLICATION_ENDPOINT = "http://192.168.1.27:2922/application/v2"  
-VESPA_APPLICATION_SCHEMA_PATH = "app/docker/app-text"  
+VESPA_APPLICATION_ENDPOINT = "http://192.168.1.27:2922/application/v2"
+VESPA_APPLICATION_SCHEMA_PATH = "app/docker/app-text"
 
 
 def in_memory_zip_from_file_bytes(file_contents: dict[str, bytes]) -> io.BytesIO:
@@ -22,9 +21,10 @@ def in_memory_zip_from_file_bytes(file_contents: dict[str, bytes]) -> io.BytesIO
     zip_buffer.seek(0)
     return zip_buffer
 
+
 def deploy_vespa_application(
-    index_names: list[str],
-    vespa_schema_path: str,
+        index_names: list[str],
+        vespa_schema_path: str,
 ) -> None:
     """Deploy a Vespa application package with multiple schemas, updating validation-overrides.xml."""
     deploy_url = f"{VESPA_APPLICATION_ENDPOINT}/tenant/default/prepareandactivate"
@@ -60,7 +60,7 @@ def deploy_vespa_application(
         "services.xml": services_content,
         "validation-overrides.xml": overrides_content.encode("utf-8"),
     }
-    
+
     # Add all schema files to the zip dictionary
     for index_name, schema_content in schema_contents.items():
         zip_dict[f"schemas/{index_name}.sd"] = schema_content
@@ -86,8 +86,6 @@ if __name__ == "__main__":
         vespa_schema_path=VESPA_APPLICATION_SCHEMA_PATH,
     )
 
-
-
-# Reference 
+# Reference
 # https://github.com/onyx-dot-app/onyx/blob/main/backend/onyx/document_index/vespa
 # https://docs.vespa.ai/en/reference/validation-overrides.html
