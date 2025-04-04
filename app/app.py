@@ -2,12 +2,23 @@ import os
 from fastapi import FastAPI, File,Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+
 from vespa_text_search import search_api
 import uvicorn
 from fastapi import UploadFile, Form
 from pathlib import Path
 from vespa import ingest_csv
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+
 
 # Mount the "web" folder to serve static files
 app.mount("/static", StaticFiles(directory="C:/Users/mmallikanti/Documents/GitHub/vespa/app/web/"), name="static")
