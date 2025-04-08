@@ -30,21 +30,22 @@ def execute_search(payload):
         return None
 
 
-def hybrid_search(query_text, username, hits=5):
+def hybrid_search(query_text, user, hits=5):
     """Perform a hybrid search combining text and semantic search."""
     query_embedding = generate_query_embedding(query_text)
-    yql = f'select * from sources celebrity_news where userQuery() or ([{{"targetHits": {hits}}}]nearestNeighbor(embedding, query_embedding)) and username matches "{username}"'
+    yql = f'select * from sources celebrity_news where username matches @input_username and ( userQuery() or ([{{"targetHits": {hits}}}]nearestNeighbor(content_embd, query_embedding)) )'
     payload = {
         "yql": yql,
         "query": query_text,
         "hits": hits,
+        "input_username": user,  
         "ranking.profile": "hybrid",
         "input.query(query_embedding)": query_embedding
     }
     return execute_search(payload)
 
 
-def text_search(query_text, username, hits=5):
+def text_search(query_text, user, hits=5):
     """Perform a text-based search using YQL."""
     # yql = f'''
     #         select * from sources celebrity_news where 
@@ -53,23 +54,25 @@ def text_search(query_text, username, hits=5):
 
     # check what userQuery does
 
-    yql = f'select * from sources celebrity_news where username matches "{username}" and userQuery()'
+    yql = f'select * from sources celebrity_news where username matches @input_username and userQuery()'
     payload = {
         "yql": yql,
         "query": query_text,
+        "input_username": user,
         "hits": hits,
         "ranking.profile": "default"
     }
     return execute_search(payload)
 
 
-def semantic_search(query_text, username, hits=5):
+def semantic_search(query_text, user, hits=5):
     """Perform a semantic search using embedding similarity."""
     query_embedding = generate_query_embedding(query_text)
-    yql = f'select * from sources celebrity_news where ([{{"targetHits": {hits}}}]nearestNeighbor(embedding, query_embedding)) and username matches "{username}"'
+    yql = f'select * from sources celebrity_news where ([{{"targetHits": {hits}}}]nearestNeighbor(content_embd, query_embedding)) and username matches @input_username'
     payload = {
         "yql": yql,
         "hits": hits,
+        "input_username": user,
         "ranking.profile": "semantic",
         "input.query(query_embedding)": query_embedding
 

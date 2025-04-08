@@ -18,7 +18,7 @@ hybrid options for combining both approaches.
     - **`content`** (string)
         - Indexing: `summary | index`
         - Ranking: `enable-bm25` (enables BM25 scoring for text search)
-    - **`embedding`** (tensor<float>(d0[384]))
+    - **`content_embd`** (tensor<float>(d0[384]))
         - Indexing: `attribute`
         - Distance Metric: `euclidean` (used for semantic similarity calculations)
 
@@ -38,17 +38,17 @@ The schema provides three ranking profiles to support different search use cases
 
 2. **`semantic`** (inherits `default`)
     - **Inputs**: `query(query_embedding)` (tensor<float>(d0[384]))
-    - **First Phase**: `closeness(embedding)`
+    - **First Phase**: `closeness(content_embd)`
         - Ranks documents based on the Euclidean distance between the query embedding and document embedding.
-    - **Second Phase**: `bm25(title) + bm25(content) + 10 * closeness(embedding)`
+    - **Second Phase**: `bm25(title) + bm25(content) + 10 * closeness(content_embd)`
         - Combines BM25 text scoring with semantic similarity (weighted 10x for embeddings). In second phase results
     - Ideal for semantic search with some text relevance.
 
 3. **`hybrid`**
     - **Inputs**: `query(query_embedding)` (tensor<float>(d0[384]))
-    - **First Phase**: `bm25(title) + bm25(content) + closeness(embedding)`
+    - **First Phase**: `bm25(title) + bm25(content) + closeness(content_embd)`
         - Combines text and semantic scoring in the initial ranking.
-    - **Second Phase**: `2 * bm25(title) + 2 * bm25(content) + 5 * closeness(embedding)`
+    - **Second Phase**: `2 * bm25(title) + 2 * bm25(content) + 5 * closeness(content_embd)`
         - Boosts BM25 scores (2x) and semantic closeness (5x) for refined ranking.
     - Best for hybrid search combining keyword and semantic relevance.
 
@@ -100,7 +100,7 @@ application.
 
 ## Ingestion Data
 
-The schema supports data ingestion through CSV files. From the web page, you can upload only CSV files. Each CSV file
+The schema supports data ingestion through CSV files and other text files. From the web page, you can upload CSV files but ach CSV file
 must contain the following fields:
 
 - **`id`**: A unique identifier for the data.

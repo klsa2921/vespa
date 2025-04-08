@@ -2,7 +2,7 @@ import json
 import requests
 from sentence_transformers import SentenceTransformer
 import csv
-from vespa_chunk import generate_chunks
+from vespa_chunk import generate_chunks,chunk_pdf
 import fitz
 from docx import Document
 import os
@@ -21,14 +21,14 @@ model = SentenceTransformer('all-MiniLM-L6-v2')  # Produces 384-dimensional embe
 
 def generate_embedding(text):
     """Generate embedding for a given text."""
-    embedding = model.encode(text, convert_to_tensor=False).tolist()
-    return embedding
+    content_embd = model.encode(text, convert_to_tensor=False).tolist()
+    return content_embd
 
 
 def prepare_despa_document_text(text_data, username):
     """Prepare document in Vespa format."""
     # Generate embedding for description
-    embedding = generate_embedding(text_data["content"])
+    content_embd = generate_embedding(text_data["content"])
 
     # Vespa document format
     document = {
@@ -38,8 +38,8 @@ def prepare_despa_document_text(text_data, username):
             "username": username,
             "title": text_data["title"],
             "content": text_data["content"],
-            "embedding": {
-                "values": embedding
+            "content_embd": {
+                "values": content_embd
             }
         }
     }
@@ -130,3 +130,13 @@ def read_docx(file_name):
 def read_text_file(file_name):
     with open(file_name, 'r', encoding='utf-8', errors='ignore') as f:
         return f.read()
+
+
+
+if __name__ == "__main__":
+    # content=read_file("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/environment.pdf")
+    # doc = fitz.open("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/environment.pdf")
+    chunks = chunk_pdf("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/environment.pdf")
+    print(f"Total chunks: {len(chunks)}")
+    for i, chunk in enumerate(chunks):
+        print(f"\n🔹 Chunk {i + 1}:\n{chunk}")

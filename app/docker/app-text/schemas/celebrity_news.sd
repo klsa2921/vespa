@@ -13,7 +13,7 @@ schema celebrity_news {
             indexing: summary | index
             index: enable-bm25
         }
-        
+
         field username type string {
             indexing: attribute | summary
             attribute: fast-search
@@ -21,7 +21,7 @@ schema celebrity_news {
 
        
 
-        field embedding type tensor<float>(d0[384]) {
+        field content_embd type tensor<float>(d0[384]) {
             indexing: attribute
             attribute {
                 distance-metric: euclidean
@@ -45,11 +45,11 @@ schema celebrity_news {
         }
 
         first-phase {
-            expression: 10 * closeness(embedding)
+            expression: 10 * closeness(content_embd)
         }
 
         second-phase {
-            expression: 2.5 * bm25(title) + 2.5 * bm25(content) + 10 * closeness(embedding)
+            expression: 2.5 * bm25(title) + 2.5 * bm25(content) + 10 * closeness(content_embd)
         }
     }
 
@@ -59,11 +59,11 @@ schema celebrity_news {
         }
 
         first-phase {
-            expression: 2.5 * bm25(title) + 2.5 * bm25(content) + 5 * closeness(embedding)
+            expression: 2.5 * bm25(title) + 2.5 * bm25(content) + 5 * closeness(content_embd)
         }
 
         second-phase {
-            expression: 2 * bm25(title) + 2 * bm25(content) + 6 * closeness(embedding)
+            expression: 2 * bm25(title) + 2 * bm25(content) + 6 * closeness(content_embd)
         }
     }
 

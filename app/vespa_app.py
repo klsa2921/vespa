@@ -35,6 +35,7 @@ def deploy_vespa_application(
     overrides_file = os.path.join(vespa_schema_path, "validation-overrides.xml")
 
     # Read services file
+    print(f"Reading services file: {services_file}")
     with open(services_file, "rb") as services_f:
         services_content = services_f.read()
 
