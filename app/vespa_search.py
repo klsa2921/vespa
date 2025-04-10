@@ -1,14 +1,17 @@
 import requests
 import json
 from sentence_transformers import SentenceTransformer
+from properties.constants import docker,local
 
 # Configuration
-VESPA_URL = "http://192.168.1.27:2923"
+VESPA_URL = docker.VESPA_INDEX_SEARCH_URL
+
+# VESPA_URL = config['vespa']['vespaUrl']
 SEARCH_ENDPOINT = f"{VESPA_URL}/search/"
 
+model_name= docker.MODEL_NAME
 # Initialize the embedding model
-model = SentenceTransformer('all-MiniLM-L6-v2')
-
+model = SentenceTransformer(model_name)
 
 # model = SentenceTransformer('all-mpnet-base-v2')  # Uncomment if you prefer this model
 
@@ -123,3 +126,15 @@ def search_api(ranking_profiles, query, username):
                 results["hybrid"] = hybrid_results
 
     return results, totalHits
+
+if __name__ == "__main__":
+# Configuration
+# VESPA_URL = "http://192.168.1.27:2923"
+    VESPA_URL1 = local.VESPA_INDEX_SEARCH_URL
+    print(VESPA_URL1)
+    # Example usage
+    query = "deforestation"
+    username = "envi"
+    ranking_profiles = ["similarity", "semantic", "hybrid"]
+    search_results, total_hits = search_api(ranking_profiles, query, username)
+    print(search_results, total_hits) 

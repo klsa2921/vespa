@@ -2,12 +2,13 @@ import os
 from fastapi import FastAPI, File, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from vespa_index import ingest_text_data, ingest_csv
+from vespa_index import ingest_text_data, ingest_csv,ingest_chunks
 from vespa_search import search_api
 import uvicorn
 from fastapi import UploadFile, Form
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
+from properties.constants import docker,local
 
 app = FastAPI()
 
@@ -19,8 +20,11 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
+static_web_dic=docker.STATIC_WEB_DIRECTORY
+upload_dir_path = docker.FILE_UPLOAD_DIRECTORY
 # Mount the "web" folder to serve static files
-app.mount("/static", StaticFiles(directory="C:/Users/mmallikanti/Documents/GitHub/vespa/app/web/"), name="static")
+# app.mount("/static", StaticFiles(directory="C:/Users/mmallikanti/Documents/GitHub/vespa/app/web/"), name="static")
+app.mount("/static", StaticFiles(directory=static_web_dic), name="static")
 
 options = ["similarity", "semantic", "hybrid"]
 
@@ -36,7 +40,7 @@ async def get_options():
 @app.get("/")
 async def root():
     # Serve the index.html file (React frontend)
-    return FileResponse("C:/Users/mmallikanti/Documents/GitHub/vespa/app/web/index.html")
+    return FileResponse(os.path.join(static_web_dic, "index.html"))
 
 
 @app.post("/search")
@@ -53,10 +57,11 @@ async def submit_data(data: Request):
     # Return the response
     return {"message": "Data received successfully", "data": search_results, "totalHits": totalHits}
 
+    # upload_dir = Path("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/")
 
 @app.post("/uploadCSV")
 async def upload_csv_file(file: UploadFile = File(...), username: str = Form(...)):
-    upload_dir = Path("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/")
+    upload_dir = Path(upload_dir_path)
     upload_dir.mkdir(parents=True, exist_ok=True)
     file_path = upload_dir / file.filename
 
@@ -71,7 +76,7 @@ async def upload_csv_file(file: UploadFile = File(...), username: str = Form(...
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...), username: str = Form(...)):
     try:
-        upload_dir = Path("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/")
+        upload_dir = Path(upload_dir_path)
         upload_dir.mkdir(parents=True, exist_ok=True)
         file_path = upload_dir / file.filename
         chunks = []  # Initialize chunks in case we need to process the file content
@@ -89,6 +94,14 @@ async def upload_file(file: UploadFile = File(...), username: str = Form(...)):
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while processing the file"}
 
+
+@app.post("/uploadChunks")
+async def upload_chunks(chunks: list, username: str = Form(...)):
+    try:
+        ingest_chunks(chunks, username)
+        return {"message": "Chunks uploaded and processed successfully"}
+    except Exception as e:
+        return {"error": str(e), "message": "An error occurred while processing the chunks"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5000)

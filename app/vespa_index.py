@@ -6,15 +6,14 @@ from vespa_chunk import generate_chunks,chunk_pdf
 import fitz
 from docx import Document
 import os
+from properties.constants import docker,local
 
 # Configuration
 # VESPA_URL = "http://localhost:8080" 
-VESPA_URL = "http://192.168.1.27:2923"
-JSONL_FILE = "employees.jsonl"
-TEXT_JSONL_FILE = "app/data/test-search.jsonl"
-
+VESPA_URL = docker.VESPA_INDEX_SEARCH_URL
+model_name= docker.MODEL_NAME
 # Initialize the embedding model 
-model = SentenceTransformer('all-MiniLM-L6-v2')  # Produces 384-dimensional embeddings
+model = SentenceTransformer(model_name)  # Produces 384-dimensional embeddings
 
 
 # model = SentenceTransformer('all-mpnet-base-v2')  # Produces 768-dimensional embeddings
@@ -95,6 +94,8 @@ def ingest_text_data(file_name, username):
         print(f"Error reading file {file_name}: {e}")
 
 
+
+
 def read_file(file_name):
     file_extension = os.path.splitext(file_name)[1].lower()
 
@@ -131,6 +132,29 @@ def read_text_file(file_name):
     with open(file_name, 'r', encoding='utf-8', errors='ignore') as f:
         return f.read()
 
+
+def get_chunks(file_path):
+    content = read_file(file_path)
+    return generate_chunks(content)
+
+
+def ingest_chunks(chunks, username):
+    try:
+        for i, chunk in enumerate(chunks):
+            try:
+                # Prepare the document for Vespa
+                text_data = {
+                    "id": chunk["id"],
+                    "title": chunk["title"],
+                    "content": chunk["text"]
+                }
+
+                vespa_doc = prepare_despa_document_text(text_data, username)
+                send_text_document_vespa(vespa_doc)
+            except Exception as e:
+                print(f"Error processing chunk {i}: {e}")
+    except Exception as e:
+        print(f"Error ingesting chunks: {e}")
 
 
 if __name__ == "__main__":

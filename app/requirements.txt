@@ -1,5 +1,10 @@
-requests
-sentence-transformers
 fastapi
 uvicorn
+sentence-transformers
+requests
+python-docx
+pdfplumber
 nltk
+PyMuPDF
+hf_xet
+python-multipart
