@@ -21,7 +21,7 @@ schema celebrity_news {
 
        
 
-        field content_embd type tensor<float>(d0[384]) {
+        field content_embd type tensor<float>(d0[768]) {
             indexing: attribute
             attribute {
                 distance-metric: euclidean
@@ -41,7 +41,7 @@ schema celebrity_news {
 
     rank-profile semantic inherits default {
         inputs {
-            query(query_embedding) tensor<float>(d0[384])
+            query(query_embedding) tensor<float>(d0[768])
         }
 
         first-phase {
@@ -55,7 +55,7 @@ schema celebrity_news {
 
     rank-profile hybrid inherits default {
         inputs {
-            query(query_embedding) tensor<float>(d0[384])
+            query(query_embedding) tensor<float>(d0[768])
         }
 
         first-phase {

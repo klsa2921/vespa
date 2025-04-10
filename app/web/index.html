@@ -217,6 +217,7 @@
 
 <script type="text/babel">
     const App = () => {
+        // const apiUrl = 'http://localhost:5000'; 
         const apiUrl = 'http://192.168.1.27:11310'; 
         const { useState, useEffect } = React;
         const [currentTab, setCurrentTab] = useState('index');
@@ -290,34 +291,64 @@
 
         const sendFileToAPI = async () => {
             if (!file) {
-                alert('No file selected!');
-                return;
+            alert('No file selected!');
+            return;
+            }
+
+            if (!inputValue.trim()) {
+            alert('Please enter a chunking mechanism!');
+            return;
             }
 
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('description', 'Your description text');
-            formData.append('username', username);
-            try {
-                const response = await fetch('http://localhost:5000/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
+            formData.append('chunkingMechanism', inputValue.trim());
 
-                const result = await response.json();
-                if (response.ok) {
-                    setResponseMessage(result.message);
-                    if (result.chunks) {
-                        setChunks(result.chunks);
-                        setShowPreview(false);
-                    } else {
-                        setShowPreview(false);
-                    }
+            try {
+            const response = await fetch(`${apiUrl}/getChunks`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                setResponseMessage(result.message);
+                if (result.chunks) {
+                setChunks(result.chunks);
+                setShowPreview(false);
                 } else {
-                    setResponseMessage(result.message || 'Error uploading file.');
+                setChunks([]);
+                setShowPreview(false);
                 }
+            } else {
+                setResponseMessage(result.message || 'Error fetching chunks.');
+            }
             } catch (error) {
-                setResponseMessage('Error uploading file.');
+            setResponseMessage('Error fetching chunks.');
+            }
+        };
+
+        const handleIndexChunks = async () => {
+            if (chunks.length === 0) {
+            alert('No chunks available to index!');
+            return;
+            }
+
+            try {
+            const response = await fetch(`${apiUrl}/uploadChunks`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chunks, username }),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert('Chunks successfully indexed!');
+            } else {
+                alert(result.message || 'Error indexing chunks.');
+            }
+            } catch (error) {
+            alert('Error indexing chunks.');
             }
         };
 
@@ -336,7 +367,7 @@
             }
 
             try {
-                const response = await fetch('http://localhost:5000/search', {
+                const response = await fetch(`${apiUrl}/search`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ranking_profiles: selectedOptions, query: inputValue, username: username}),
@@ -352,7 +383,7 @@
             if (currentTab === 'search' && isLoggedIn) {
                 const fetchOptions = async () => {
                     try {
-                        const response = await fetch('http://localhost:5000/ranking_profiles', {
+                        const response = await fetch(`${apiUrl}/ranking_profiles`, {
                             method: 'GET',
                             headers: {'Content-Type': 'application/json'},
                         });
@@ -427,13 +458,24 @@
                                 </div>
                             )}
                         </div>
+                        <div>
+                            <input
+                                type="text"
+                                placeholder="Enter chunking mechanism"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                            />
+                        </div>
                         <div className="upload-button-container">
-                            <button onClick={sendFileToAPI}>Index data</button>
+                            <button onClick={sendFileToAPI}>Upload File</button>
                             {responseMessage && <span>{responseMessage}</span>}
                         </div>
                         {/* Display the preview button if chunks are available */}
                         {chunks.length > 0 && (
-                            <button onClick={() => setShowPreview(!showPreview)}>Toggle Preview</button>
+                            <div>
+                                <button onClick={() => setShowPreview(!showPreview)}>Preview Chunks</button>
+                                <button onClick={handleIndexChunks}>Index Chunks</button>
+                            </div>
                         )}
 
                         {/* Display the chunks below the upload form when preview is toggled */}

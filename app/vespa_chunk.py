@@ -3,12 +3,14 @@ from sentence_transformers import SentenceTransformer, util
 from transformers import BertTokenizer
 import pdfplumber
 
-# nltk.download('punkt')
-# nltk.download('punkt_tab')
+
+nltk.download('punkt')
+nltk.download('punkt_tab')
 
 
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-max_tokens = 384
+# model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
+max_tokens = 784
 similarity_threshold = 0.7
 tokenizer = model.tokenizer
 

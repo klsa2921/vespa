@@ -8,3 +8,4 @@ nltk
 PyMuPDF
 hf_xet
 python-multipart
+PyPDF2

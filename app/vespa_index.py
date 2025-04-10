@@ -7,16 +7,17 @@ import fitz
 from docx import Document
 import os
 from properties.constants import docker,local
+from PyPDF2 import PdfReader
 
 # Configuration
 # VESPA_URL = "http://localhost:8080" 
 VESPA_URL = docker.VESPA_INDEX_SEARCH_URL
 model_name= docker.MODEL_NAME
 # Initialize the embedding model 
-model = SentenceTransformer(model_name)  # Produces 384-dimensional embeddings
+# model = SentenceTransformer(model_name)  # Produces 384-dimensional embeddings
 
 
-# model = SentenceTransformer('all-mpnet-base-v2')  # Produces 768-dimensional embeddings
+model = SentenceTransformer('all-mpnet-base-v2')  # Produces 768-dimensional embeddings
 
 def generate_embedding(text):
     """Generate embedding for a given text."""
@@ -39,6 +40,25 @@ def prepare_despa_document_text(text_data, username):
             "content": text_data["content"],
             "content_embd": {
                 "values": content_embd
+            }
+        }
+    }
+    return document
+
+def prepare_despa_document_chunks(text_data, username):
+    """Prepare document in Vespa format."""
+    # Generate embedding for description
+
+    # Vespa document format
+    document = {
+        "put": f"id:celebrity_news:celebrity_news::{text_data['id']}",
+        "fields": {
+            "id": (username + "_" + str(text_data["id"])),
+            "username": username,
+            "title": text_data["title"],
+            "content": text_data["content"],
+            "content_embd": {
+                "values": text_data["embedding"]
             }
         }
     }
@@ -73,8 +93,10 @@ def ingest_text_data(file_name, username):
     :param file_name: str, path to the JSONL file
     :param username: str, username for the documents
     """
+    print(f"Processing file: {file_name}")
     try:
         content = read_file(file_name)
+        print(f"File content: {content}")
         chunks = generate_chunks(content)
         for i, chunk in enumerate(chunks):
             try:
@@ -94,30 +116,69 @@ def ingest_text_data(file_name, username):
         print(f"Error reading file {file_name}: {e}")
 
 
+def ingest_chunk_array(chunks, username):
+    """
+    Ingest an array of text chunks into Vespa.
+    :param chunks: list, array of text chunks
+    :param username: str, username for the documents
+    """
+    try:
+        for i, chunk in enumerate(chunks):
+            try:
+                # Prepare the document for Vespa
+                text_data = {
+                    "id": f"chunk_{i}",
+                    "title": f"Chunk {i + 1}",
+                    "content": chunk,
+                    "embedding": generate_embedding(chunk)
+                }
+
+                vespa_doc = prepare_despa_document_chunks(text_data, username)
+                send_text_document_vespa(vespa_doc)
+            except Exception as e:
+                print(f"Error processing chunk {i}: {e}")
+    except Exception as e:
+        print(f"Error ingesting chunks: {e}")
+
+
 
 
 def read_file(file_name):
-    file_extension = os.path.splitext(file_name)[1].lower()
+    try:
+        print(f"Reading file: {file_name}")
+        file_extension = os.path.splitext(file_name)[1].lower()
+        
+        if file_extension == '.pdf':
+            print("Reading PDF file")
+            return read_pdf(file_name)
 
-    if file_extension == '.pdf':
-        return read_pdf(file_name)
+        elif file_extension == '.docx':
+            print("Reading DOCX file")
+            return read_docx(file_name)
 
-    elif file_extension == '.docx':
-        return read_docx(file_name)
+        elif file_extension == '.txt':
+            return read_text_file(file_name)
 
-    elif file_extension == '.txt':
-        return read_text_file(file_name)
-
-    else:
-        raise ValueError(f"Unsupported file type: {file_extension}")
+        else:
+            raise ValueError(f"Unsupported file type: {file_extension}")
+    except Exception as e:
+        print(f"Error reading file in read file method {file_name}: {e}")
+        raise
 
 
 def read_pdf(file_name):
-    doc = fitz.open(file_name)
+    print(f"Reading PDF file read_pdf method: {file_name}")
+    print(f"Resolved file path: {os.path.abspath(file_name)}")
+    doc = PdfReader(file_name)
     text = ""
-    for page in doc:
-        text += page.get_text()
+    for page in doc.pages:
+        text += page.extract_text()
     return text
+    # text = ""
+    
+    # for page in doc:
+    #     text += page.get_text()
+    # return text
 
 
 def read_docx(file_name):
@@ -145,11 +206,12 @@ def ingest_chunks(chunks, username):
                 # Prepare the document for Vespa
                 text_data = {
                     "id": chunk["id"],
-                    "title": chunk["title"],
-                    "content": chunk["text"]
+                    "title": chunk["id"],
+                    "content": chunk["text"],
+                    "embedding": chunk["embedding"]
                 }
 
-                vespa_doc = prepare_despa_document_text(text_data, username)
+                vespa_doc = prepare_despa_document_chunks(text_data, username)
                 send_text_document_vespa(vespa_doc)
             except Exception as e:
                 print(f"Error processing chunk {i}: {e}")

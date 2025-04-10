@@ -11,9 +11,9 @@ SEARCH_ENDPOINT = f"{VESPA_URL}/search/"
 
 model_name= docker.MODEL_NAME
 # Initialize the embedding model
-model = SentenceTransformer(model_name)
+# model = SentenceTransformer(model_name)
 
-# model = SentenceTransformer('all-mpnet-base-v2')  # Uncomment if you prefer this model
+model = SentenceTransformer('all-mpnet-base-v2')  # Uncomment if you prefer this model
 
 
 def generate_query_embedding(query_text):

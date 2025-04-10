@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI, File, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from vespa_index import ingest_text_data, ingest_csv,ingest_chunks
+from vespa_index import ingest_text_data, ingest_csv,ingest_chunks,get_chunks,ingest_chunk_array
 from vespa_search import search_api
 import uvicorn
 from fastapi import UploadFile, Form
@@ -94,11 +94,32 @@ async def upload_file(file: UploadFile = File(...), username: str = Form(...)):
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while processing the file"}
 
+@app.post("/getChunks")
+async def sendChunks(file: UploadFile = File(...),chunkingMechanism: str = Form(...)):
+    try:
+        print(f"Received file: {file.filename}")
+        upload_dir = Path(upload_dir_path)
+        print(f"Upload directory: {upload_dir}")
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        file_path = upload_dir / file.filename
+        print(f"File path: {file_path}")
+        chunks = []
+        with file_path.open("wb") as f:
+            f.write(await file.read())
+
+        chunks = get_chunks(file_path)
+        return {"chunks": chunks}
+    except Exception as e:
+        return {"error": str(e), "message": "An error occurred while processing the file"}
+
 
 @app.post("/uploadChunks")
-async def upload_chunks(chunks: list, username: str = Form(...)):
+async def upload_chunks(data:Request):
     try:
-        ingest_chunks(chunks, username)
+        data=await data.json()
+        chunks=data.get("chunks")
+        username=data.get("username")
+        ingest_chunk_array(chunks, username)
         return {"message": "Chunks uploaded and processed successfully"}
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while processing the chunks"}
