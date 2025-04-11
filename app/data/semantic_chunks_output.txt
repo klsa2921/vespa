@@ -1,0 +1,324 @@
+ID: 87249002-cdb8-47ec-a72a-349a7715324e
+Content:
+Table:
+
+Executive Regulations
+of Human Resources Law
+in the Federal Government
+Cabinet Resolution No. (48) of 2023 Regarding
+the Executive Regulations of the Federal
+Decree-Law No. (49) of 2022 Regarding the
+Human Resources in the Federal Government
+
+Table:
+Human Resource Planning | 17
+
+Table:
+Bonuses and Allowances | 35
+
+Table:
+Provisions for the employment options in the Federal
+Government | 21
+
+Table:
+Transfer, Delegation, Secondment and Loan | 41
+
+Table:
+Official and Training Missions | 55
+
+Table:
+Performance & Reward | 47
+
+Table:
+Types of Leave | 58
+
+Table:
+Training & Development | 52
+
+Table:
+Termination of Service | 96
+
+Table:
+Annex (1) The Unified Contract Form for the Federal Government
+Employees | 108
+Annex (2) Delegation allocations in official and training missions
+Travel Tickets for a Delegate on an Official Mission, Training
+Course Program or Outside the UAE | 115
+Annex (3) On the violations during the official working hours | 116
+Annex (4) On the Technical Allowance | 118
+Annex (5) Schedule of benefits of experts and consultants | 119
+Annex (6) On the Schedule of Special Benefits | 120
+
+Table:
+Type of work: | 
+Types of benefits (None, Experts &
+Consultants, Special) | 
+Position: | 
+Grade: | 
+Base salary: | 
+Special allowance or any other
+allowance for the employee in
+accordance with the regulations
+adopted in the Government
+(please indicate, if any): | 
+Gross salary (including base salary
+and all bonuses and allowances): | 
+Other annual benefits as per
+the regulations adopted by the
+Federal Government (if any): | 
+
+Table:
+Position and grade
+of the delegate | The Delegate
+Center | Head of delegation |  | Member of a
+delegation and/or a
+single delegate | 
+ | Entitlement | Hospitality |  | Hospitality | 
+ |  | None | Full | None | Full
+Undersecretary
+of the Ministry,
+Director General
+and their
+equivalent | Allowance
+for heading a
+delegation | 1,050 | 525 | - | -
+ | Travel
+allowance | 3,000 | 1,500 | 3,000 | 1,500
+ | Total | 4,050 | 2,025 | 3,000 | 1,500
+Assistant
+Undersecretary
+and the equivalent | Travel
+allowance | 3,000 | 1,500 | 3,000 | 1,500
+Employees from
+the special to the
+second grades,
+and their
+equivalents | Travel
+allowance | 2,500 | 1,250 | 2,500 | 1,250
+Employees of the
+third grade and
+below or their
+equivalent. | Travel
+allowance | 2,000 | 1,000 | 2,000 | 1,000
+
+Table:
+Grade | Travel Class
+Undersecretary of the Ministry, Director General and their
+equivalent. | First Class
+Assistant Undersecretary and the equivalent, and employees
+of special grades. | Business Class
+First-grade employees and below or their equivalent. | Economy Class
+
+
+Metadata: {'type': 'element', 'elements': ['table', 'table', 'table', 'table', 'table', 'table', 'table', 'table', 'table', 'table', 'table', 'table', 'table', 'table'], 'pages': [0, 2, 3, 5, 54, 57]}
+
+================================================================================
+
+ID: eef74185-ab32-4bc7-81c4-f6cc526fbb82
+Content:
+Table:
+Type of violation | Gradation of the penalty during the year |  | 
+ | First time | Second time | Third time
+I- Violations related to scheduled working hours without an acceptable excuse |  |  | 
+Delay from work
+not exceeding two
+hours, and what
+exceeds this period
+shall be treated
+as an absent
+employee. | A attention draw
+letter | A written warning | Deduction of a
+day from gross
+salary
+Absence from
+Work without Legal
+Permission for
+Three Days or Less | Deduction of a
+day from salary +
+days of absence | Deduction of two days
+from gross salary + days
+of absence | Deduction
+of three days
+from gross
+salary + days of
+absence
+More than three
+days and less than
+ten days | Deduction of
+three days from
+salary + days of
+absence | Deduction of four days
+from the total salary +
+days of absence | Deduction of
+five days from
+gross salary
++ days of
+absence
+II- Violations related to electronic signature
+in accordance with the mechanisms adopted by the Federal Government |  |  | 
+Failure to sign in
+the actual time of
+attendance and
+departure without
+an acceptable
+excuse | Deduction of a
+day from gross
+salary | Deduction of two days
+from gross salary | Deduction of
+three days from
+gross salary
+
+Table:
+Type of violation | Gradation of the penalty during the year |  | 
+ | First time | Second time | Third time
+Manipulation of the
+method of proof
+of attendance and
+departure | Deduction of five
+days from gross
+salary | Referral to the Human Resources
+Department to determine a severe
+penalty | 
+III- Violations related to leaving the workplace
+without permission or an acceptable excuse |  |  | 
+Leaving the
+workplace without
+permission or
+excuse acceptable
+to the direct
+supervisor | A attention draw
+letter | A written warning | Deduction of a
+day from gross
+salary
+IV: Violations related to the actual regular working hours |  |  | 
+Being present
+without acceptable
+justification
+in a place not
+designated as a
+workplace | A attention draw
+letter | A written warning | Deduction of a
+day from gross
+salary
+Sleep at work | Deduction of two
+days from gross
+salary | Referral to the Human Resources
+Department to determine a severe
+penalty | 
+
+Table:
+Category eligible for bonus | Bonus Value
+Incumbents of the specialized, professional,
+or technical positions (who hold university
+qualifications), which include engineering
+jobs in all their specialties, IT jobs, agricultural
+engineering jobs, and geology jobs. | (50%) of the base salary up
+to a maximum of (5,000)
+dirhams per month.
+Holders of specialized, professional, or technical
+positions who hold a post-secondary diploma),
+which includes auxiliary engineering jobs in
+all their specialties, IT jobs, and agricultural
+extensionists. | (30%) of the base salary,
+after a maximum of AED
+(2,500) per month
+
+
+Metadata: {'type': 'element', 'elements': ['table', 'table', 'table'], 'pages': [58, 59]}
+
+================================================================================
+
+ID: 4c6b97e2-d558-44f8-9e08-1a887b8247cc
+Content:
+Table:
+Category of
+Benefits of Experts
+and Consultants | National Employee |  |  | 
+ | The corresponding
+job grade in the
+general staff | Base
+salary | Years of
+Experience | Maximum
+Gross Monthly
+Salary (AED)*
+A | Special (A) | 34,000 | (20) years
+and above | 120,000
+B | Special (B) | 25,500 | (15) years
+to (19) years | 90,000
+C | 1st | 17,300 | (10) years
+to (14) years | 55,000
+The national employees appointed according to the benefits of experts and consultants only are
+required to be the incumbents of the positions of (consultant / expert) or (assistant consultant
+/ assistant expert) who occupy the first grade to the special grade (A) or its equivalent in the
+approved grades and salary scales.
+*All salary items prescribed for the job grade on which the expert or consultant is appointed shall
+be included in the grades and salary scales approved by the Federal Authority or under any other
+decisions within the gross month salary granted to him and not exceeding the maximum limit set
+out above. |  |  |  | 
+
+Table:
+Category of
+Benefits of
+Experts and
+Consultants | National Employee |  |  | 
+ | The
+corresponding
+job grade in
+the general
+staff | Base
+salary | Years of
+Experience | Maximum Gross
+Monthly Salary
+(AED)*
+A | 1 | 7,475 | (20) years
+and above | 120,000
+B |  |  | (15) years
+to (19) years | 90,000
+C |  |  | (10) years
+to (14) years | 55,000
+The non-national employees appointed according to the benefits of experts and consultants only
+are required to be the incumbents of the positions of (consultant / expert) or (assistant consultant
+/ assistant expert) who occupy the first grade or its equivalent in the approved grades and salary
+scales.
+*All salary items prescribed for the job grade on which the expert or consultant is appointed shall
+be included in the grades and salary scales approved by the Federal Authority or under any other
+decisions within the gross month salary granted to him and not exceeding the maximum limit set
+out above. |  |  |  | 
+
+
+Metadata: {'type': 'element', 'elements': ['table', 'table'], 'pages': [59]}
+
+================================================================================
+
+ID: 5e84d75d-bfbe-49f6-9646-bb774745f87b
+Content:
+Table:
+Category
+of Benefits
+of Experts
+and Consultants | National Employee |  | Non-national Employee | 
+ | Base
+salary | Maximum Gross
+Monthly Salary
+(AED) | Base
+salary | Maximum
+Gross
+Monthly
+Salary (AED)*
+Special (A) | 34,000 | 100,000 | - | -
+Special (B) | 25,500 | 76,000 | - | -
+1 | 17,300 | 51,000 | 7,475 | 85,000
+2nd | 15,940 | 48,000 | 6,900 | 60,000
+The employees appointed according to the special benefits only are required to
+be the incumbents of the positions at the first grade to the special grade (A) or
+its equivalent in the approved grades and salary scales.
+*All salary items prescribed for the job grade of the special benefits to which the
+employee appointed shall be included in the grades and salary scales approved
+by the Federal Authority or under any other decisions within the gross month
+salary granted to him and not exceeding the maximum limit set out above. |  |  |  | 
+
+
+Metadata: {'type': 'element', 'elements': ['table'], 'pages': [60]}
+
+================================================================================
+
