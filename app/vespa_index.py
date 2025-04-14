@@ -6,13 +6,13 @@ from vespa_chunk import generate_chunks,chunk_pdf
 import fitz
 from docx import Document
 import os
-from properties.constants import docker,local
+from properties.constants import env
 from PyPDF2 import PdfReader
 
 # Configuration
 # VESPA_URL = "http://localhost:8080" 
-VESPA_URL = docker.VESPA_INDEX_SEARCH_URL
-model_name= docker.MODEL_NAME
+VESPA_URL = env.VESPA_INDEX_SEARCH_URL
+model_name= env.MODEL_NAME
 # Initialize the embedding model 
 # model = SentenceTransformer(model_name)  # Produces 384-dimensional embeddings
 

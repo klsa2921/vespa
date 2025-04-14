@@ -1,15 +1,15 @@
 import requests
 import json
 from sentence_transformers import SentenceTransformer
-from properties.constants import docker,local
+from properties.constants import env
 
 # Configuration
-VESPA_URL = docker.VESPA_INDEX_SEARCH_URL
+VESPA_URL = env.VESPA_INDEX_SEARCH_URL
 
 # VESPA_URL = config['vespa']['vespaUrl']
 SEARCH_ENDPOINT = f"{VESPA_URL}/search/"
 
-model_name= docker.MODEL_NAME
+model_name= env.MODEL_NAME
 # Initialize the embedding model
 # model = SentenceTransformer(model_name)
 

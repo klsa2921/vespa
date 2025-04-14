@@ -3,16 +3,16 @@ import logging
 import os
 import zipfile
 from datetime import datetime, timedelta
-from properties.constants import docker,local
+from properties.constants import env
 
 import requests  # pip install requests
 
 logger = logging.getLogger(__name__)
 
 # VESPA_APPLICATION_ENDPOINT = "http://192.168.1.27:2922/application/v2"
-VESPA_APPLICATION_ENDPOINT = local.VESPA_APPLICATION_URL
+VESPA_APPLICATION_ENDPOINT = env.VESPA_APPLICATION_URL
 # VESPA_APPLICATION_SCHEMA_PATH = "app/docker/app-text"
-VESPA_APPLICATION_SCHEMA_PATH = local.VESPA_APPLICATION_PATH
+VESPA_APPLICATION_SCHEMA_PATH = env.VESPA_APPLICATION_PATH
 
 
 def in_memory_zip_from_file_bytes(file_contents: dict[str, bytes]) -> io.BytesIO:

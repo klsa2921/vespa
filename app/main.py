@@ -2,13 +2,14 @@ import os
 from fastapi import FastAPI, File, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from vespa_index import ingest_text_data, ingest_csv,ingest_chunks,get_chunks,ingest_chunk_array
+from chunking_mechanism import TextChunkingManager
+from vespa_index import ingest_text_data, ingest_csv,ingest_chunks,get_chunks,ingest_chunk_array,read_file
 from vespa_search import search_api
 import uvicorn
 from fastapi import UploadFile, Form
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
-from properties.constants import docker,local
+from properties.constants import env
 
 app = FastAPI()
 
@@ -20,14 +21,14 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-static_web_dic=docker.STATIC_WEB_DIRECTORY
-upload_dir_path = docker.FILE_UPLOAD_DIRECTORY
+static_web_dic=env.STATIC_WEB_DIRECTORY
+upload_dir_path = env.FILE_UPLOAD_DIRECTORY
 # Mount the "web" folder to serve static files
 # app.mount("/static", StaticFiles(directory="C:/Users/mmallikanti/Documents/GitHub/vespa/app/web/"), name="static")
 app.mount("/static", StaticFiles(directory=static_web_dic), name="static")
 
 options = ["similarity", "semantic", "hybrid"]
-
+chunkingOptions = ["sentence", "paragraph", "document","regex","semantic"]
 
 @app.get("/ranking_profiles")
 async def get_options():
@@ -94,6 +95,20 @@ async def upload_file(file: UploadFile = File(...), username: str = Form(...)):
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while processing the file"}
 
+@app.post("/uploadFile")
+async def upload_file_endpoint(file: UploadFile = File(...)):
+    try:
+        upload_dir = Path(upload_dir_path)
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        file_path = upload_dir / file.filename
+
+        with file_path.open("wb") as f:
+            f.write(await file.read())
+
+        return {"filename": file.filename, "message": "File uploaded successfully"}
+    except Exception as e:
+        return {"error": str(e), "message": "An error occurred while uploading the file"}
+
 @app.post("/getChunks")
 async def sendChunks(file: UploadFile = File(...),chunkingMechanism: str = Form(...)):
     try:
@@ -109,6 +124,53 @@ async def sendChunks(file: UploadFile = File(...),chunkingMechanism: str = Form(
 
         chunks = get_chunks(file_path)
         return {"chunks": chunks}
+    except Exception as e:
+        return {"error": str(e), "message": "An error occurred while processing the file"}
+
+@app.post("/getChunks1")
+async def sendChunks1(data: Request):
+    try:
+        body = await data.json()
+        file_path = body.get("file_path")
+        chunkingMechanism = body.get("chunkingMechanism")
+        if chunkingMechanism not in chunkingOptions:
+            return {"error": "Invalid chunkingMechanism", "message": "chunkingMechanism must be one of the following: " + ", ".join(chunkingOptions)}
+        
+        if not file_path:
+            return {"error": "file_path is required", "message": "Missing file_path in the request"}
+
+        upload_dir = Path(upload_dir_path)
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        file_path = upload_dir / file_path
+
+        chunks = get_chunks(file_path)
+        return {"chunks": chunks, "chunkingMechanism": chunkingMechanism}
+    except Exception as e:
+        return {"error": str(e), "message": "An error occurred while processing the file"}
+
+
+@app.post("/getChunksWithMechanism")
+async def sendChunksWithMechanism(data: Request):
+    try:
+        body = await data.json()
+        file_path = body.get("file_path")
+        chunkingMechanism = body.get("chunkingMechanism")
+        if chunkingMechanism not in chunkingOptions:
+            return {"error": "Invalid chunkingMechanism", "message": "chunkingMechanism must be one of the following: " + ", ".join(chunkingOptions)}
+        
+        if not file_path:
+            return {"error": "file_path is required", "message": "Missing file_path in the request"}
+        
+        manager = TextChunkingManager()
+        upload_dir = Path(upload_dir_path)
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        file_path = upload_dir / file_path
+        content = read_file(file_path)
+        parameters = body.get("parameters")
+        parameters["file_content"] = content
+        # print(f"Parameters: {parameters}")
+        chunks=manager.chunk_text(chunkingMechanism,parameters)
+        return {"chunks": chunks, "chunkingMechanism": chunkingMechanism}
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while processing the file"}
 

@@ -390,3 +390,12 @@ if __name__ == "__main__":
     # print("Hybrid Chunks:")
     # for chunk in hybrid_chunks:
     #     print(f"ID: {chunk['id']}\nContent: {chunk['content'][:100]}...\nMetadata: {chunk['metadata']}\n")
+
+
+    
+    # Chunking mechanism types
+    # ['sentencse based chunking','sentence based with overlaping','semantic section based chunking',
+    #   'paragraph based chunking','fixed token sized chunking']
+    # 
+    #     
+    ###

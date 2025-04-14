@@ -1,14 +1,13 @@
-class docker:
-    VESPA_INDEX_SEARCH_URL = "http://192.168.1.27:2923"
-    VESPA_APPLICATION_URL="http://192.168.1.27:2922/application/v2"
-    MODEL_NAME="all-MiniLM-L6-v2"
-    FILE_UPLOAD_DIRECTORY ="/app/uploads"
-    INDEX_HTML_PATH="/app/web/index.html"
-    VESPA_APPLICATION_PATH="/app/vespa/"
-    STATIC_WEB_DIRECTORY="/app/web/"
+# class docker:
+#     VESPA_INDEX_SEARCH_URL = "http://192.168.1.27:2923"
+#     VESPA_APPLICATION_URL="http://192.168.1.27:2922/application/v2"
+#     MODEL_NAME="all-MiniLM-L6-v2"
+#     FILE_UPLOAD_DIRECTORY ="/app/uploads"
+#     INDEX_HTML_PATH="/app/web/index.html"
+#     VESPA_APPLICATION_PATH="/app/vespa/"
+#     STATIC_WEB_DIRECTORY="/app/web/"
 
-    
-class local:
+class env:
     VESPA_INDEX_SEARCH_URL = "http://192.168.1.27:2923"
     VESPA_APPLICATION_URL="http://192.168.1.27:2922/application/v2"
     MODEL_NAME="all-MiniLM-L6-v2"

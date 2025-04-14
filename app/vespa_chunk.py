@@ -109,6 +109,8 @@ def generate_chunks(file_content):
     return chunks
 
 
+
+
 def is_title(text_block):
     """Identify if a text block is a title based on font size and position."""
     return text_block["size"] > 16  # Example: Titles have larger font size
