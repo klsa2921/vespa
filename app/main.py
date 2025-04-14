@@ -153,6 +153,7 @@ async def sendChunks1(data: Request):
 async def sendChunksWithMechanism(data: Request):
     try:
         body = await data.json()
+        print(f"Received body: {body}")
         file_path = body.get("file_path")
         chunkingMechanism = body.get("chunkingMechanism")
         if chunkingMechanism not in chunkingOptions:
@@ -170,6 +171,9 @@ async def sendChunksWithMechanism(data: Request):
         parameters["file_content"] = content
         # print(f"Parameters: {parameters}")
         chunks=manager.chunk_text(chunkingMechanism,parameters)
+        print(f"Chunks: {chunks}")
+        if not chunks:
+            return {"error": "No chunks generated", "message": "No chunks were generated from the file content"}
         return {"chunks": chunks, "chunkingMechanism": chunkingMechanism}
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while processing the file"}
@@ -178,6 +182,7 @@ async def sendChunksWithMechanism(data: Request):
 @app.post("/uploadChunks")
 async def upload_chunks(data:Request):
     try:
+        print(f"Received data: {data}")
         data=await data.json()
         chunks=data.get("chunks")
         username=data.get("username")

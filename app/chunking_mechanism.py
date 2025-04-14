@@ -23,45 +23,69 @@ class RegexTextChunker:
         """
         chunks = []
         chunk_index = 0
+        try:
+            # Ensure the pattern is a valid regex
+            regex = re.compile(pattern)
+        except re.error as e:
+            print(f"Invalid regex pattern: {pattern}")
+            raise ValueError(f"Invalid regex pattern: {pattern}") from e
 
-        regex = re.compile(pattern)
-
-        matches = list(regex.finditer(text))
+        try:
+            matches = list(regex.finditer(text))
+        except Exception as e:
+            print(f"Error while finding matches with the regex: {e}")
+            raise RuntimeError("Failed to find matches with the provided regex.") from e
 
         current_pos = 0
         previous_chunk = ""
-
-        for i, match in enumerate(matches + [None]):  
-            if match:
-                start, end = match.start(), match.end()
-            else:
-                start, end = len(text), len(text)  
-
-            segment = text[current_pos:start].strip()
-
-            if segment:
-                token_count = TextChunkResizer().count_tokens(segment)
-
-                if token_count <= max_tokens:
-                    chunk_content = (previous_chunk + " ." + segment).strip()
-                    chunk_tokens = TextChunkResizer().count_tokens(chunk_content)
-
-                    chunks.append({
-                        "content": chunk_content,
-                        "tokens": chunk_tokens,
-                        "index": chunk_index
-                    })
-                    chunk_index += 1
-
-                    previous_chunk = ' '.join(segment.split()[-overlap_tokens:])
+        try:
+            for i, match in enumerate(matches + [None]):  
+                if match:
+                    start, end = match.start(), match.end()
                 else:
-                    sub_chunks = TextChunkResizer().split_large_chunk(segment, max_tokens, chunk_index, overlap_tokens)
-                    chunks.extend(sub_chunks)
-                    chunk_index += len(sub_chunks)
+                    start, end = len(text), len(text)  
 
-                    previous_chunk = ' '.join(sub_chunks[-1]["content"].split()[-overlap_tokens:])
+                segment = text[current_pos:start].strip()
 
-            current_pos = end
+                if segment:
+                    try:
+                        token_count = TextChunkResizer().count_tokens(segment)
+                    except Exception as e:
+                        print(f"Error while counting tokens in segment: {e}")
+                        raise RuntimeError("Failed to count tokens in the segment.") from e
+
+                    if token_count <= max_tokens:
+                        try:
+                            chunk_content = (previous_chunk + " ." + segment).strip()
+                            chunk_tokens = TextChunkResizer().count_tokens(chunk_content)
+                        except Exception as e:
+                            print(f"Error while preparing chunk content: {e}")
+                            raise RuntimeError("Failed to prepare chunk content.") from e
+
+                        chunks.append({
+                            "content": chunk_content,
+                            "tokens": chunk_tokens,
+                            "index": chunk_index
+                        })
+                        chunk_index += 1
+
+                        previous_chunk = ' '.join(segment.split()[-overlap_tokens:])
+                    else:
+                        try:
+                            sub_chunks = TextChunkResizer().split_large_chunk(segment, max_tokens, chunk_index, overlap_tokens)
+                        except Exception as e:
+                            print(f"Error while splitting large chunk: {e}")
+                            raise RuntimeError("Failed to split large chunk.") from e
+
+                        chunks.extend(sub_chunks)
+                        chunk_index += len(sub_chunks)
+
+                        previous_chunk = ' '.join(sub_chunks[-1]["content"].split()[-overlap_tokens:])
+
+                current_pos = end
+        except Exception as e:
+            print(f"Unexpected error during chunking: {e}")
+            raise RuntimeError("An unexpected error occurred during chunking.") from e
 
         return chunks
 
@@ -208,12 +232,12 @@ class TextChunkingManager:
         chunker_class = self.chunkers[mechanism_type]
         chunker = chunker_class()
 
-
+        # print(f"parameters: {parameters}")
         if mechanism_type == "regex":
             text = parameters.get("file_content", "")
             pattern = parameters.get("pattern", "")
-            max_tokens = parameters.get("max_tokens", 1000)
-            overlap_tokens = parameters.get("overlap_tokens", 100)
+            max_tokens = int(parameters.get("max_tokens", 1000))
+            overlap_tokens = int(parameters.get("overlap_tokens", 100))
             return chunker.chunk_text(text, pattern, max_tokens, overlap_tokens)
 
         elif mechanism_type == "semantic":

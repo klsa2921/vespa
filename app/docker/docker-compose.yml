@@ -14,23 +14,22 @@ services:
       - ./vespa-logs:/opt/vespa/var
       - ./app:/app
       - ./vespa-data:/data
-    restart: unless-stopped
+    restart: unless-stopped                                                                                                                                                         
     networks:
       - vespa-net
 
-  vespa-app:
-    image:
-      build:
-        context: ./app
-        dockerfile: Dockerfile
-    container_name: vespa-app
-    ports:
-      - "11310:8000"
-    volumes:
-      - ./app:/app
-    restart: unless-stopped
-    networks:
-      - vespa-net
+  # vespa-app:
+  #   build:
+  #     context: ./app
+  #     dockerfile: Dockerfile
+  #   container_name: vespa-app
+  #   ports:
+  #     - "11310:8000"
+  #   volumes:
+  #     - ./app:/app
+  #   restart: unless-stopped
+  #   networks:
+  #     - vespa-net
 
 networks:
   vespa-net:
