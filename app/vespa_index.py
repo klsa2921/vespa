@@ -96,7 +96,7 @@ def ingest_text_data(file_name, username):
     print(f"Processing file: {file_name}")
     try:
         content = read_file(file_name)
-        print(f"File content: {content}")
+        # print(f"File content: {content}")
         chunks = generate_chunks(content)
         for i, chunk in enumerate(chunks):
             try:
@@ -126,11 +126,12 @@ def ingest_chunk_array(chunks, username):
         for i, chunk in enumerate(chunks):
             try:
                 # Prepare the document for Vespa
+                id=chunk["index"]
                 text_data = {
-                    "id": f"chunk_{i}",
-                    "title": f"Chunk {i + 1}",
-                    "content": chunk,
-                    "embedding": generate_embedding(chunk)
+                    "id": f"chunk_{id}",
+                    "title": f"Chunk {id + 1}",
+                    "content": chunk["content"],
+                    "embedding": generate_embedding(chunk["content"])
                 }
 
                 vespa_doc = prepare_despa_document_chunks(text_data, username)

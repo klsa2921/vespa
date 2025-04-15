@@ -15,7 +15,7 @@ const App = () => {
     const [username, setUsername] = useState('');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [chunks, setChunks] = useState([]);
-
+    const [buttonVisible, setButtonVisible] = useState(false);
     // States to control flow views
     const [showForm, setShowForm] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
@@ -102,6 +102,8 @@ const App = () => {
             setFile(uploadedFile);
             setFileName(uploadedFile.name);
             setResponseMessage('');
+            setButtonVisible(true);
+            // setButtonVisible(true);
             // Reset views on re-upload
             setShowForm(false);
             setShowPreview(false);
@@ -115,6 +117,7 @@ const App = () => {
     const removeFile = () => {
         setFile(null);
         setFileName('');
+        setButtonVisible(false);
         setResponseMessage('');
         setShowForm(false);
         setShowPreview(false);
@@ -124,7 +127,7 @@ const App = () => {
         setSubmittedValues(null);
     };
 
-    // When file is selected and "Next" is clicked, call uploadFile API then show form view
+    // When file is selected and "Upload file" is clicked, call uploadFile API then show form view
     const handleShowForm = async () => {
         if (!file) {
             alert('Please select a file first.');
@@ -140,9 +143,11 @@ const App = () => {
             const result = await response.json();
             if (response.ok) {
                 setResponseMessage(result.message);
+                setButtonVisible(false);
                 setShowForm(true);
                 setShowPreview(false);
                 setChunks([]);
+                
             } else {
                 setResponseMessage(result.message || 'Error uploading file.');
             }
@@ -206,6 +211,7 @@ const App = () => {
                 username,
                 dynamicFormData: chosenOption ? formValues : null
             };
+
             const response = await fetch(`${apiUrl}/uploadChunks`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -373,7 +379,8 @@ const App = () => {
                             style={{ display: 'none' }}
                             onChange={handleFileUpload}
                         />
-                        <button
+                        
+                            <button
                             onClick={() => document.getElementById('file-input').click()}
                             className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
                         >
@@ -389,12 +396,22 @@ const App = () => {
                             >
                                 Remove
                             </button>
+
+                        {buttonVisible && (
                             <button
+                            onClick={handleShowForm}
+                            className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600"
+                            >    
+                            Upload File
+                            </button>
+                        )}
+
+                            {/* <button
                                 onClick={handleShowForm}
                                 className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600"
                             >
                                 Upload File
-                            </button>
+                            </button> */}
                         </div>
                     )}
 
@@ -448,7 +465,12 @@ const App = () => {
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => setShowForm(false)}
+                                    onClick={() => {
+                                        setShowForm(false)
+                                        setShowPreview(false);
+                                        setChunks([]);
+                                        setButtonVisible(true);
+                                    }}
                                     className="bg-gray-500 text-white p-2 rounded-md hover:bg-gray-600"
                                 >
                                     Back

@@ -112,12 +112,12 @@ async def upload_file_endpoint(file: UploadFile = File(...)):
 @app.post("/getChunks")
 async def sendChunks(file: UploadFile = File(...),chunkingMechanism: str = Form(...)):
     try:
-        print(f"Received file: {file.filename}")
+        # print(f"Received file: {file.filename}")
         upload_dir = Path(upload_dir_path)
-        print(f"Upload directory: {upload_dir}")
+        # print(f"Upload directory: {upload_dir}")
         upload_dir.mkdir(parents=True, exist_ok=True)
         file_path = upload_dir / file.filename
-        print(f"File path: {file_path}")
+        # print(f"File path: {file_path}")
         chunks = []
         with file_path.open("wb") as f:
             f.write(await file.read())
@@ -153,7 +153,7 @@ async def sendChunks1(data: Request):
 async def sendChunksWithMechanism(data: Request):
     try:
         body = await data.json()
-        print(f"Received body: {body}")
+        # print(f"Received body: {body}")
         file_path = body.get("file_path")
         chunkingMechanism = body.get("chunkingMechanism")
         if chunkingMechanism not in chunkingOptions:
@@ -171,7 +171,7 @@ async def sendChunksWithMechanism(data: Request):
         parameters["file_content"] = content
         # print(f"Parameters: {parameters}")
         chunks=manager.chunk_text(chunkingMechanism,parameters)
-        print(f"Chunks: {chunks}")
+        # print(f"Chunks: {chunks}")
         if not chunks:
             return {"error": "No chunks generated", "message": "No chunks were generated from the file content"}
         return {"chunks": chunks, "chunkingMechanism": chunkingMechanism}
@@ -182,8 +182,10 @@ async def sendChunksWithMechanism(data: Request):
 @app.post("/uploadChunks")
 async def upload_chunks(data:Request):
     try:
-        print(f"Received data: {data}")
         data=await data.json()
+        # print(f"Received data: {data}")
+        if not data.get("chunks"):
+            return {"error": "chunks is required", "message": "Missing chunks in the request"}
         chunks=data.get("chunks")
         username=data.get("username")
         ingest_chunk_array(chunks, username)
