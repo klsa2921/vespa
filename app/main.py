@@ -10,7 +10,7 @@ from fastapi import UploadFile, Form
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 from properties.constants import env
-
+from chunking.text_chunking_manager import TextChunkingManager as tcm
 app = FastAPI()
 
 app.add_middleware(
@@ -179,6 +179,38 @@ async def sendChunksWithMechanism(data: Request):
         return {"error": str(e), "message": "An error occurred while processing the file"}
 
 
+
+@app.post("/getChunksWithMechanismWithAll")
+async def sendChunksWithMechanismWithAll(data: Request):
+    try:
+        body = await data.json()
+        # print(f"Received body: {body}")
+        file_path = body.get("file_path")
+        file_content= body.get("file_content")  
+        chunkingMechanism = body.get("chunkingMechanism")
+        if chunkingMechanism not in chunkingOptions:
+            return {"error": "Invalid chunkingMechanism", "message": "chunkingMechanism must be one of the following: " + ", ".join(chunkingOptions)}
+        
+        if not file_path:
+            return {"error": "file_path is required", "message": "Missing file_path in the request"}
+        
+        upload_dir = Path(upload_dir_path)
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        file_path = upload_dir / file_path
+        content = read_file(file_path)
+        parameters = body.get("parameters")
+        # parameters["file_content"] = content
+        parameters["file_content"] = file_content
+
+        # print(f"Parameters: {parameters}")
+        chunks= tcm().chunk_text(chunkingMechanism, file_content, **parameters)
+        # print(f"Chunks: {chunks}")
+        if not chunks:
+            return {"error": "No chunks generated", "message": "No chunks were generated from the file content"}
+        return {"chunks": chunks, "chunkingMechanism": chunkingMechanism}
+    except Exception as e:
+        return {"error": str(e), "message": "An error occurred while processing the file"}
+
 @app.post("/uploadChunks")
 async def upload_chunks(data:Request):
     try:
@@ -192,6 +224,7 @@ async def upload_chunks(data:Request):
         return {"message": "Chunks uploaded and processed successfully"}
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while processing the chunks"}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5000)
