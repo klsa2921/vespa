@@ -1,0 +1,6 @@
+{
+    "vespa_index_url":"http://localhost:",
+    "vespa_search_url":"http://localhost:",
+    "index_name":"",
+    "embedding_fie4ld_name":""
+}

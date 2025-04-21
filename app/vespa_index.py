@@ -233,25 +233,55 @@ def get_chunks(file_path):
     return generate_chunks(content)
 
 
-def ingest_chunks(chunks, username):
+# def ingest_chunks(chunks, username):
+#     try:
+#         for i, chunk in enumerate(chunks):
+#             try:
+#                 # Prepare the document for Vespa
+#                 text_data = {
+#                     "id": chunk["id"],
+#                     "title": chunk["id"],
+#                     "content": chunk["text"],
+#                     "embedding": chunk["embedding"]
+#                 }
+
+#                 vespa_doc = prepare_despa_document_chunks(text_data, username)
+#                 send_text_document_vespa(vespa_doc)
+#             except Exception as e:
+#                 print(f"Error processing chunk {i}: {e}")
+#     except Exception as e:
+#         print(f"Error ingesting chunks: {e}")
+
+
+def ingest_text_data_with_index_name(data):
+    """
+    Ingest text data from a JSONL file into Vespa.
+    :param file_name: str, path to the JSONL file
+    :param username: str, username for the documents
+    """
+    chunks = data["chunks"]
+    username = data["username"]
+    index_name= data["index_name"]
+    vespa_index_url= data["vespa_index_url"]
+    file_name = data["file_name"]
     try:
+        # print(f"File content: {content}")
         for i, chunk in enumerate(chunks):
             try:
                 # Prepare the document for Vespa
                 text_data = {
-                    "id": chunk["id"],
-                    "title": chunk["id"],
-                    "content": chunk["text"],
-                    "embedding": chunk["embedding"]
+                    "id": f"{file_name}_chunk_{i}",
+                    "title": f"Chunk {i + 1}",
+                    "content": chunk
                 }
 
-                vespa_doc = prepare_despa_document_chunks(text_data, username)
-                send_text_document_vespa(vespa_doc)
+                vespa_doc = prepare_despa_document_chunks_with_index_name(QA_INDEX_NAME,text_data, username)
+                send_text_document_vespa_with_index_name(QA_INDEX_NAME,vespa_doc)
             except Exception as e:
                 print(f"Error processing chunk {i}: {e}")
+        return chunks
     except Exception as e:
-        print(f"Error ingesting chunks: {e}")
-
+        print(f"Error reading file {file_name}: {e}")
 
 def ingest_qa_data(chunks, username):
     """

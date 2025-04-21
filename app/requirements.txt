@@ -9,3 +9,6 @@ PyMuPDF
 hf_xet
 python-multipart
 PyPDF2
+llama_index
+langchain
+python-dotenv

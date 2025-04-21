@@ -3,6 +3,8 @@ from llama_index.text_splitter import (
     TokenTextSplitter as LlamaTokenSplitter,
 )
 
+# from llama_index.text_splitter import TokenTextSplitter as LlamaTokenSplitter
+
 class LlamaChunker:
     def __init__(self, chunk_size=600, chunk_overlap=64):
         self.splitters = {

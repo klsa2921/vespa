@@ -3,7 +3,9 @@ from fastapi import FastAPI, File, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from chunking_mechanism import TextChunkingManager
-from vespa_index import ingest_text_data, ingest_csv,ingest_chunks,get_chunks,ingest_chunk_array,read_file
+from vespa_index import ingest_text_data, ingest_csv,get_chunks,ingest_chunk_array,read_file
+
+from vespa_index2 import ingest_text_data_with_index_name
 from vespa_search import search_api
 import uvicorn
 from fastapi import UploadFile, Form
@@ -11,6 +13,7 @@ from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 from properties.constants import env
 from chunking.text_chunking_manager import TextChunkingManager as tcm
+import json
 app = FastAPI()
 
 app.add_middleware(
@@ -30,6 +33,8 @@ app.mount("/static", StaticFiles(directory=static_web_dic), name="static")
 options = ["similarity", "semantic", "hybrid"]
 chunkingOptions = ["sentence", "paragraph", "document","regex","semantic"]
 
+allChunkingOptions=["regex","semantic","langchain_chars","langchain_rec","langchain_tokens","langchain_md","llama_rec","llama_tokens","llama_words"]
+
 @app.get("/ranking_profiles")
 async def get_options():
     # Return the options as a JSON response
@@ -43,7 +48,7 @@ async def root():
     # Serve the index.html file (React frontend)
     return FileResponse(os.path.join(static_web_dic, "index.html"))
 
-
+#using the api to search
 @app.post("/search")
 async def submit_data(data: Request):
     # Process the received data (FastAPI will automatically parse and validate the data)
@@ -52,49 +57,14 @@ async def submit_data(data: Request):
     query = body.get("query")
     username = body.get("username")
     search_results, totalHits = search_api(ranking_profiles, query, username)
-    # print(f"Received ranking profiles: {ranking_profiles} and query: {query}")
-    # print(f"Search results: {search_results}")
 
     # Return the response
     return {"message": "Data received successfully", "data": search_results, "totalHits": totalHits}
 
-    # upload_dir = Path("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/")
-
-@app.post("/uploadCSV")
-async def upload_csv_file(file: UploadFile = File(...), username: str = Form(...)):
-    upload_dir = Path(upload_dir_path)
-    upload_dir.mkdir(parents=True, exist_ok=True)
-    file_path = upload_dir / file.filename
-
-    with file_path.open("wb") as f:
-        f.write(await file.read())
-
-    ingest_csv(file_path, username)
-
-    return {"filename": file.filename, "message": "File uploaded and processed successfully"}
 
 
-@app.post("/upload")
-async def upload_file(file: UploadFile = File(...), username: str = Form(...)):
-    try:
-        upload_dir = Path(upload_dir_path)
-        upload_dir.mkdir(parents=True, exist_ok=True)
-        file_path = upload_dir / file.filename
-        chunks = []  # Initialize chunks in case we need to process the file content
-        with file_path.open("wb") as f:
-            f.write(await file.read())
-
-        if file.filename.endswith('.csv'):
-            ingest_csv(file_path, username)
-        else:
-            chunks = ingest_text_data(file_path, username)
-        if chunks:
-            # If chunks were generated, return them in the response for confirmation
-            return {"filename": file.filename, "message": "File uploaded and processed successfully", "chunks": chunks}
-        return {"filename": file.filename, "message": "File uploaded and processed successfully"}
-    except Exception as e:
-        return {"error": str(e), "message": "An error occurred while processing the file"}
-
+    
+#Using the api to upload file
 @app.post("/uploadFile")
 async def upload_file_endpoint(file: UploadFile = File(...)):
     try:
@@ -109,77 +79,9 @@ async def upload_file_endpoint(file: UploadFile = File(...)):
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while uploading the file"}
 
-@app.post("/getChunks")
-async def sendChunks(file: UploadFile = File(...),chunkingMechanism: str = Form(...)):
-    try:
-        # print(f"Received file: {file.filename}")
-        upload_dir = Path(upload_dir_path)
-        # print(f"Upload directory: {upload_dir}")
-        upload_dir.mkdir(parents=True, exist_ok=True)
-        file_path = upload_dir / file.filename
-        # print(f"File path: {file_path}")
-        chunks = []
-        with file_path.open("wb") as f:
-            f.write(await file.read())
-
-        chunks = get_chunks(file_path)
-        return {"chunks": chunks}
-    except Exception as e:
-        return {"error": str(e), "message": "An error occurred while processing the file"}
-
-@app.post("/getChunks1")
-async def sendChunks1(data: Request):
-    try:
-        body = await data.json()
-        file_path = body.get("file_path")
-        chunkingMechanism = body.get("chunkingMechanism")
-        if chunkingMechanism not in chunkingOptions:
-            return {"error": "Invalid chunkingMechanism", "message": "chunkingMechanism must be one of the following: " + ", ".join(chunkingOptions)}
-        
-        if not file_path:
-            return {"error": "file_path is required", "message": "Missing file_path in the request"}
-
-        upload_dir = Path(upload_dir_path)
-        upload_dir.mkdir(parents=True, exist_ok=True)
-        file_path = upload_dir / file_path
-
-        chunks = get_chunks(file_path)
-        return {"chunks": chunks, "chunkingMechanism": chunkingMechanism}
-    except Exception as e:
-        return {"error": str(e), "message": "An error occurred while processing the file"}
 
 
-@app.post("/getChunksWithMechanism")
-async def sendChunksWithMechanism(data: Request):
-    try:
-        body = await data.json()
-        # print(f"Received body: {body}")
-        file_path = body.get("file_path")
-        chunkingMechanism = body.get("chunkingMechanism")
-        if chunkingMechanism not in chunkingOptions:
-            return {"error": "Invalid chunkingMechanism", "message": "chunkingMechanism must be one of the following: " + ", ".join(chunkingOptions)}
-        
-        if not file_path:
-            return {"error": "file_path is required", "message": "Missing file_path in the request"}
-        
-        manager = TextChunkingManager()
-        upload_dir = Path(upload_dir_path)
-        upload_dir.mkdir(parents=True, exist_ok=True)
-        file_path = upload_dir / file_path
-        content = read_file(file_path)
-        parameters = body.get("parameters")
-        parameters["file_content"] = content
-        # print(f"Parameters: {parameters}")
-        chunks=manager.chunk_text(chunkingMechanism,parameters)
-        # print(f"Chunks: {chunks}")
-        if not chunks:
-            return {"error": "No chunks generated", "message": "No chunks were generated from the file content"}
-        return {"chunks": chunks, "chunkingMechanism": chunkingMechanism}
-    except Exception as e:
-        return {"error": str(e), "message": "An error occurred while processing the file"}
-
-
-
+#Present using api with all chunking mechanisms
 @app.post("/getChunksWithMechanismWithAll")
 async def sendChunksWithMechanismWithAll(data: Request):
     try:
@@ -188,7 +90,7 @@ async def sendChunksWithMechanismWithAll(data: Request):
         file_path = body.get("file_path")
         file_content= body.get("file_content")  
         chunkingMechanism = body.get("chunkingMechanism")
-        if chunkingMechanism not in chunkingOptions:
+        if chunkingMechanism not in allChunkingOptions:
             return {"error": "Invalid chunkingMechanism", "message": "chunkingMechanism must be one of the following: " + ", ".join(chunkingOptions)}
         
         if not file_path:
@@ -211,20 +113,32 @@ async def sendChunksWithMechanismWithAll(data: Request):
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while processing the file"}
 
-@app.post("/uploadChunks")
-async def upload_chunks(data:Request):
+    
+
+#present using api tp upload chunks into particular index
+@app.post("/uploadChunksIntoParticularIndex")
+async def uploadChunksIntoParticularIndex(data:Request):
     try:
         data=await data.json()
         # print(f"Received data: {data}")
         if not data.get("chunks"):
             return {"error": "chunks is required", "message": "Missing chunks in the request"}
-        chunks=data.get("chunks")
-        username=data.get("username")
-        ingest_chunk_array(chunks, username)
+        ingest_text_data_with_index_name(data)
         return {"message": "Chunks uploaded and processed successfully"}
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while processing the chunks"}
 
+@app.post("/indexProperties")
+def indexProperties(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        print(f"Error: File {file_path} not found")
+        return None
+    except json.JSONDecodeError:
+        print("Error: Invalid JSON format")
+        return None
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5000)
