@@ -1,0 +1,60 @@
+schema qa_index {
+    document qa_index {
+        field id type string {
+            indexing: summary | attribute
+            match: exact
+        }
+        
+        field chunkid type string {
+            indexing: summary | attribute
+            match: exact
+        }
+
+        field question type string {
+            indexing: summary | index
+        }
+
+        field answer type string {
+            indexing: summary | index
+            index: enable-bm25
+        }
+
+        field quest_embedding type tensor<float>(d0[768]) {
+            indexing: attribute
+            attribute {
+                distance-metric: euclidean
+            }
+        }
+    }
+
+    fieldset default {
+        fields: id,chunkid, question, answer
+    }
+
+    rank-profile default {
+        first-phase {
+            expression: bm25(question) + bm25(answer)
+        }
+    }
+
+    rank-profile semantic inherits default {
+        inputs {
+            query(query_embedding) tensor<float>(d0[768])
+        }
+        first-phase {
+            expression: closeness(quest_embedding)
+        }
+        second-phase {
+            expression: bm25(question) + bm25(answer) + 10 * closeness(quest_embedding)
+        }
+    }
+
+    rank-profile hybrid {
+        inputs {
+            query(query_embedding) tensor<float>(d0[768])
+        }
+        first-phase {
+            expression: bm25(question) + bm25(answer) + 5 * closeness(quest_embedding)
+        }
+    }
+}

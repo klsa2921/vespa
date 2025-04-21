@@ -8,11 +8,14 @@ from docx import Document
 import os
 from properties.constants import env
 from PyPDF2 import PdfReader
+from qa_service.qa_genarator import QaGenerator
 
 # Configuration
 # VESPA_URL = "http://localhost:8080" 
 VESPA_URL = env.VESPA_INDEX_SEARCH_URL
 model_name= env.MODEL_NAME
+CHAT_MODEL_NAME=env.CHAT_MODEL_NAME
+QA_INDEX_NAME=env.QA_INDEX_NAME
 # Initialize the embedding model 
 # model = SentenceTransformer(model_name)  # Produces 384-dimensional embeddings
 
@@ -63,6 +66,36 @@ def prepare_despa_document_chunks(text_data, username):
         }
     }
     return document
+
+
+def prepare_despa_document_chunks_with_index_name(index_name,text_data, username):
+    """Prepare document in Vespa format."""
+    # Generate embedding for description
+    
+    fields = {
+        "id": (username + "_" + str(text_data["id"]))
+                }
+
+    for key, value in text_data.items():
+        if key not in ["id"]:
+            fields[key] = value
+    # Vespa document format
+    document = {
+        "put": f"id:{index_name}:{index_name}::{text_data['id']}",
+        "fields": fields
+    }
+    return document
+
+def send_text_document_vespa_with_index_name(index_name,document):
+    """Send document to Vespa document API."""
+    endpoint = f"{VESPA_URL}/document/v1/{index_name}/{index_name}/docid/{document['fields']['id']}"
+    response = requests.post(endpoint, json=document, headers={"Content-Type": "application/json"})
+
+    if response.status_code == 200:
+        print(f"Successfully indexed text {document['fields']['id']}")
+    else:
+        print(f"Failed to index text {document['fields']['id']}: {response.text}")
+
 
 
 def send_text_document_vespa(document):
@@ -220,10 +253,75 @@ def ingest_chunks(chunks, username):
         print(f"Error ingesting chunks: {e}")
 
 
+def ingest_qa_data(chunks, username):
+    """
+    Ingest question-answer data into Vespa.
+    :param chunks: list of strings (text chunks)
+    """
+    try:
+        for i, chunk in enumerate(chunks):
+            try:
+                print(f"Processing chunk {i}...")
+
+                # Step 1: Generate QA
+                try:
+                    qa_generator = QaGenerator(CHAT_MODEL_NAME)
+                    qa_response = qa_generator.generate_qa(chunk)
+                    print(f"QA response for chunk {i}: {qa_response}")
+                except Exception as e:
+                    print(f"Error generating QA for chunk {i}: {e}")
+                    continue
+
+                # Step 2: Parse QA response
+                if qa_response:
+                    try:
+                        qa_data = json.loads(qa_response)
+                    except Exception as e:
+                        print(f"Error parsing QA response JSON for chunk {i}: {e}")
+                        continue
+
+                    for qa in qa_data:
+                        try:
+                            question = qa.get("question")
+                            answer = qa.get("answer")
+
+                            if question and answer:
+                                try:
+                                    embedding = generate_embedding(question)
+                                except Exception as e:
+                                    print(f"Error generating embedding for question in chunk {i}: {e}")
+                                    continue
+
+                                text_data = {
+                                    "id": f"qa_chunk_{i}",
+                                    "chunkid": f"QA Chunk {i + 1}",
+                                    "question": question,
+                                    "answer": answer,
+                                    "quest_embedding": embedding
+                                }
+
+                                try:
+                                    vespa_doc = prepare_despa_document_chunks_with_index_name(QA_INDEX_NAME, text_data, username)
+                                    send_text_document_vespa_with_index_name(QA_INDEX_NAME, vespa_doc)
+                                    print(f"Successfully ingested chunk {i}, question: {question}")
+                                except Exception as e:
+                                    print(f"Error sending document to Vespa for chunk {i}: {e}")
+                        except Exception as e:
+                            print(f"Error processing QA pair in chunk {i}: {e}")
+            except Exception as e:
+                print(f"Unexpected error in processing chunk {i}: {e}")
+    except Exception as e:
+        print(f"Error ingesting QA data: {e}")
+
+
 if __name__ == "__main__":
     # content=read_file("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/environment.pdf")
     # doc = fitz.open("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/environment.pdf")
-    chunks = chunk_pdf("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/environment.pdf")
+    # chunks = chunk_pdf("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/environment.pdf")
+    # print(f"Total chunks: {len(chunks)}")
+    # for i, chunk in enumerate(chunks):
+        # print(f"\n🔹 Chunk {i + 1}:\n{chunk}")
+    chunks=get_chunks("C:/Users/mmallikanti/Documents/GitHub/vespa/app/uploads/environment.pdf")
     print(f"Total chunks: {len(chunks)}")
-    for i, chunk in enumerate(chunks):
-        print(f"\n🔹 Chunk {i + 1}:\n{chunk}")
+    # print(f"Chunks: {chunks}")
+    ingest_qa_data(chunks,"testuser")

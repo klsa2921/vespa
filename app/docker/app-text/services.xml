@@ -12,8 +12,8 @@
         <min-redundancy>2</min-redundancy>
         <documents>
             <document type="celebrity_news" mode="index" />
+            <document type="qa_index" mode="index" />
         </documents>
-        
         <nodes>
             <node hostalias="node1" distribution-key="0" />
         </nodes>
