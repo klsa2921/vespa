@@ -10,6 +10,11 @@ schema qa_index {
             match: exact
         }
 
+        field username type string {
+            indexing: summary | attribute
+            match: exact
+        }
+
         field question type string {
             indexing: summary | index
         }
@@ -28,7 +33,7 @@ schema qa_index {
     }
 
     fieldset default {
-        fields: id,chunkid, question, answer
+        fields: id,chunkid, question, answer,username
     }
 
     rank-profile default {

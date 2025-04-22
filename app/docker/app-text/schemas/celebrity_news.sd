@@ -5,6 +5,11 @@ schema celebrity_news {
             match: exact
         }
 
+        field chunkid type string {
+            indexing: summary | attribute
+            match: exact
+        }
+
         field title type string {
             indexing: summary | index
         }
@@ -30,7 +35,7 @@ schema celebrity_news {
     }
 
     fieldset default {
-        fields: id, title, content
+        fields: id, chunkid,title, content
     }
 
     rank-profile default {

@@ -2,10 +2,8 @@ import os
 from fastapi import FastAPI, File, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from chunking_mechanism import TextChunkingManager
-from vespa_index import ingest_text_data, ingest_csv,get_chunks,ingest_chunk_array,read_file
 
-from vespa_index2 import ingest_text_data_with_index_name
+from vespa_index2 import ingest_text_data_with_index_name,ingest_qa_data,read_file
 from vespa_search import search_api
 import uvicorn
 from fastapi import UploadFile, Form
@@ -14,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from properties.constants import env
 from chunking.text_chunking_manager import TextChunkingManager as tcm
 import json
+
 app = FastAPI()
 
 app.add_middleware(
@@ -53,10 +52,7 @@ async def root():
 async def submit_data(data: Request):
     # Process the received data (FastAPI will automatically parse and validate the data)
     body = await data.json()
-    ranking_profiles = body.get("ranking_profiles")
-    query = body.get("query")
-    username = body.get("username")
-    search_results, totalHits = search_api(ranking_profiles, query, username)
+    search_results, totalHits = search_api(body)
 
     # Return the response
     return {"message": "Data received successfully", "data": search_results, "totalHits": totalHits}
@@ -88,7 +84,7 @@ async def sendChunksWithMechanismWithAll(data: Request):
         body = await data.json()
         # print(f"Received body: {body}")
         file_path = body.get("file_path")
-        file_content= body.get("file_content")  
+        # file_content= body.get("file_content")  
         chunkingMechanism = body.get("chunkingMechanism")
         if chunkingMechanism not in allChunkingOptions:
             return {"error": "Invalid chunkingMechanism", "message": "chunkingMechanism must be one of the following: " + ", ".join(chunkingOptions)}
@@ -99,7 +95,7 @@ async def sendChunksWithMechanismWithAll(data: Request):
         upload_dir = Path(upload_dir_path)
         upload_dir.mkdir(parents=True, exist_ok=True)
         file_path = upload_dir / file_path
-        content = read_file(file_path)
+        file_content = read_file(file_path)
         parameters = body.get("parameters")
         # parameters["file_content"] = content
         parameters["file_content"] = file_content
@@ -123,14 +119,32 @@ async def uploadChunksIntoParticularIndex(data:Request):
         # print(f"Received data: {data}")
         if not data.get("chunks"):
             return {"error": "chunks is required", "message": "Missing chunks in the request"}
-        ingest_text_data_with_index_name(data)
-        return {"message": "Chunks uploaded and processed successfully"}
+        try:
+            ingest_text_data_with_index_name(data)
+        except Exception as e:
+            return {"error": str(e), "message": "An error occurred while processing the chunks and ingesting into Vespa"}
+        
+        try:
+            qa_data=ingest_qa_data(data)
+            if not qa_data:
+                return {"error": "An error occurred while processing the chunks and ingesting qa recomendation into Vespa", "message": "Missing qa_data in the request"}
+            response={
+                "message": "Chunks ingested successfully",
+                "qa_data": qa_data,
+            }
+            return response
+        except Exception as e:
+            return {"error": str(e), "message": "An error occurred while processing the chunks and ingesting qa recomendation into Vespa"}
+        
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while processing the chunks"}
 
-@app.post("/indexProperties")
-def indexProperties(file_path):
+@app.get("/indexProperties")
+def indexProperties():
     try:
+        file_path = os.path.join(static_web_dic, "properties/properties.json")
+        if not os.path.exists(file_path):
+            return {"error": "File not found", "message": "index_properties.json file not found"}
         with open(file_path, 'r') as file:
             return json.load(file)
     except FileNotFoundError:

@@ -49,28 +49,27 @@
           ],
         },
       };
-
+      const fetchVespaConfig = async () => {
+        setVespaConfigLoading(true);
+        try {
+          const response = await fetch(`${apiUrl}/indexProperties`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          if (!response.ok) {
+            throw new Error('Failed to fetch Vespa configuration');
+          }
+          const data = await response.json();
+          setVespaConfig(data);
+          setVespaConfigLoading(false);
+        } catch (err) {
+          setVespaConfigError(err.message);
+          setVespaConfigLoading(false);
+        }
+      };
       // Fetch Vespa configuration when index tab is active
       useEffect(() => {
         if (currentTab === 'index' && isLoggedIn && showForm) {
-          const fetchVespaConfig = async () => {
-            setVespaConfigLoading(true);
-            try {
-              const response = await fetch(`${apiUrl}/vespaConfig`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-              });
-              if (!response.ok) {
-                throw new Error('Failed to fetch Vespa configuration');
-              }
-              const data = await response.json();
-              setVespaConfig(data);
-              setVespaConfigLoading(false);
-            } catch (err) {
-              setVespaConfigError(err.message);
-              setVespaConfigLoading(false);
-            }
-          };
           fetchVespaConfig();
         }
       }, [currentTab, isLoggedIn, showForm]);
@@ -190,7 +189,7 @@
           parameters: formValues,
         };
         try {
-          const response = await fetch(`${apiUrl}/getChunksWithMechanism`, {
+          const response = await fetch(`${apiUrl}/getChunksWithMechanismWithAll`, {
             method: 'POST',
             body: JSON.stringify(payload),
             headers: { 'Content-Type': 'application/json' },
@@ -227,10 +226,11 @@
           const payload = {
             chunks,
             username,
+            file_name: fileName,
             dynamicFormData: chosenOption ? formValues : null,
             vespaConfig, // Include Vespa configuration
           };
-          const response = await fetch(`${apiUrl}/uploadChunks`, {
+          const response = await fetch(`${apiUrl}/uploadChunksIntoParticularIndex`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -260,13 +260,23 @@
           return;
         }
         try {
+          const data = {
+            query: inputValue,
+            ranking_profiles: selectedOptions,
+            username,
+            vespaConfig, 
+          };
+          console.log('Data to be sent:', data); // Debugging line
           const response = await fetch(`${apiUrl}/search`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ranking_profiles: selectedOptions, query: inputValue, username }),
+            body: JSON.stringify(data),
           });
           dynamo = await response.json();
-          setResponseData(data);
+          if (!response.ok) {
+            throw new Error(dynamo.message || 'Error fetching data from Vespa.');
+          }
+          setResponseData(dynamo);
         } catch (error) {
           setError('An error occurred while submitting the form.');
         }
@@ -319,12 +329,12 @@
 
       // Vespa config fields (assumed structure, adjust as needed)
       const vespaConfigFields = [
-        { name: 'index_name', label: 'Index Name', type: 'text', required: true },
-        { name: 'vespa_index_url', label: 'Vespa Index URL', type: 'text', required: true },
+        "index_name","vespa_search_url","embedding_field_name"
       ];
 
       useEffect(() => {
         if (currentTab === 'search' && isLoggedIn) {
+          fetchVespaConfig();
           const fetchOptions = async () => {
             try {
               const response = await fetch(`${apiUrl}/ranking_profiles`, {
@@ -474,7 +484,7 @@
                     {vespaConfigError && <div className="text-red-500">Error: {vespaConfigError}</div>}
                     {!vespaConfigLoading && !vespaConfigError && (
                       <div>
-                        {vespaConfigFields.map((field) => (
+                        {/* {vespaConfigFields.map((field) => (
                           <div key={field.name} className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">
                               {field.label}
@@ -489,6 +499,27 @@
                               placeholder={field.label}
                             />
                           </div>
+                        ))} */}
+
+                        {Object.keys( vespaConfig).length === 0 ? (
+                          <div className="text-gray-700">No Vespa configuration available.</div>
+                        ) : (
+                          Object.keys(vespaConfig).map((key) => ( 
+                            <div key={key} className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">
+                              {key}
+                            </label>
+                            <input
+                              type={'text'}
+                              name={key}
+                              value={vespaConfig[key] || ''}
+                              onChange={handleVespaConfigChange}
+                              required={true}
+                              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                              placeholder={'Enter value of'+ key}
+                            />
+                          </div>
+                        )
                         ))}
                       </div>
                     )}
@@ -585,6 +616,72 @@
                   ))}
                 </div>
               )}
+
+              <div className="vespa-config-section mt-6">
+                    <h3 className="text-xl font-semibold mb-4">Vespa Configuration</h3>
+                    {vespaConfigLoading && <div className="text-gray-700">Loading Vespa configuration...</div>}
+                    {vespaConfigError && <div className="text-red-500">Error: {vespaConfigError}</div>}
+                    {!vespaConfigLoading && !vespaConfigError && (
+                      <div>
+                        {/* {vespaConfigFields.map((field) => (
+                          <div key={field.name} className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">
+                              {field.label}
+                            </label>
+                            <input
+                              type={field.type}
+                              name={field.name}
+                              value={vespaConfig[field.name] || ''}
+                              onChange={handleVespaConfigChange}
+                              required={field.required}
+                              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                              placeholder={field.label}
+                            />
+                          </div>
+                        ))} */}
+                        
+                        {/* {Object.keys( vespaConfig).length === 0 ? (
+                          <div className="text-gray-700">No Vespa configuration available.</div>
+                        ) : (
+                          Object.keys(vespaConfig).map((key) => ( 
+                            <div key={key} className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">
+                              {key}
+                            </label>
+                            <input
+                              type={'text'}
+                              name={key}
+                              value={vespaConfig[key] || ''}
+                              onChange={handleVespaConfigChange}
+                              required={true}
+                              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                              placeholder={'Enter value of'+ key}
+                            />
+                          </div>
+                        )
+                        ))} */}
+                        {vespaConfigFields.length === 0 ? (
+  <div className="text-gray-700">No Vespa configuration fields defined.</div>
+) : (
+  vespaConfigFields.map((field) => (
+    <div key={field} className="mb-4">
+      <label className="block text-sm font-medium text-gray-700">{field.label}</label>
+      <input
+        type={'text'}
+        name={field}
+        value={vespaConfig[field] || ''}
+        onChange={handleVespaConfigChange}
+        required={ true}
+        className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+        placeholder={`Enter value of ${field}`}
+      />
+    </div>
+  ))
+)}
+                      </div>
+                    )}
+                  </div>
+
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700">Search Query:</label>
                 <input

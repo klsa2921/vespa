@@ -1,6 +1,8 @@
 {
-    "vespa_index_url":"http://localhost:",
-    "vespa_search_url":"http://localhost:",
-    "index_name":"",
-    "embedding_fie4ld_name":""
+    "vespa_index_url":"http://192.168.1.27:2923",
+    "vespa_search_url":"http://192.168.1.27:2923",
+    "index_name":"celebrity_news",
+    "embedding_field_name":"content_embd",
+    "qa_index_name":"qa_index",
+    "qa_embedding_field_name":"quest_embd"
 }

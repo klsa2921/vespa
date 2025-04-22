@@ -65,7 +65,13 @@ class QaGenerator:
         # This should call the model to generate questions and answers based on the text
         chatModel = ChatModel(MODEL_API_URL, MODEL_NAME)
         response = chatModel.chat_with_model(text)
-        print("Response from model:", response)
+        # print("Response from model:", response)
+        response = response.replace("\n", "").replace("'", "\"")
+        try:
+            response = json.loads(response)
+        except json.JSONDecodeError:
+            print("Error decoding JSON response")
+            return {"error": "Invalid JSON response"}
         return response
     
 

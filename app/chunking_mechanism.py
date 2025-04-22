@@ -1,14 +1,14 @@
 import re
 import nltk
 from sentence_transformers import SentenceTransformer, util
-from llama_index.text_splitter import RecursiveCharacterTextSplitter as LlamaRecursiveSplitter
-from llama_index.text_splitter import   TokenTextSplitter as LlamaTokenSplitter
-from langchain.text_splitter import (
-    CharacterTextSplitter,
-    RecursiveCharacterTextSplitter,
-    TokenTextSplitter,
-    MarkdownTextSplitter,
-    )
+# from llama_index.text_splitter import RecursiveCharacterTextSplitter as LlamaRecursiveSplitter
+# from llama_index.text_splitter import   TokenTextSplitter as LlamaTokenSplitter
+# from langchain.text_splitter import (
+#     CharacterTextSplitter,
+#     RecursiveCharacterTextSplitter,
+#     TokenTextSplitter,
+#     MarkdownTextSplitter,
+#     )
 
 
 
@@ -179,54 +179,54 @@ class SemanticSentenceChunker:
         return chunks
 
 
-class langchainChunker:
-    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
-        self.char_splitter = CharacterTextSplitter(
-            chunk_size=chunk_size, chunk_overlap=chunk_overlap
-        )
-        self.recursive_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=chunk_size, chunk_overlap=chunk_overlap
-        )
-        self.token_splitter = TokenTextSplitter(
-            chunk_size=chunk_size, chunk_overlap=chunk_overlap
-        )
-        self.markdown_splitter = MarkdownTextSplitter(
-            chunk_size=chunk_size, chunk_overlap=chunk_overlap
-        )
+# class langchainChunker:
+#     def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
+#         self.char_splitter = CharacterTextSplitter(
+#             chunk_size=chunk_size, chunk_overlap=chunk_overlap
+#         )
+#         self.recursive_splitter = RecursiveCharacterTextSplitter(
+#             chunk_size=chunk_size, chunk_overlap=chunk_overlap
+#         )
+#         self.token_splitter = TokenTextSplitter(
+#             chunk_size=chunk_size, chunk_overlap=chunk_overlap
+#         )
+#         self.markdown_splitter = MarkdownTextSplitter(
+#             chunk_size=chunk_size, chunk_overlap=chunk_overlap
+#         )
 
-    def chunk_by_chars(self, text: str) -> list[str]:
-        """Split purely by character count."""
-        return self.char_splitter.split_text(text)
+#     def chunk_by_chars(self, text: str) -> list[str]:
+#         """Split purely by character count."""
+#         return self.char_splitter.split_text(text)
 
-    def chunk_by_recursive_chars(self, text: str) -> list[str]:
-        """Split at natural boundaries (punctuation, sentences) with overlap."""
-        return self.recursive_splitter.split_text(text)
+#     def chunk_by_recursive_chars(self, text: str) -> list[str]:
+#         """Split at natural boundaries (punctuation, sentences) with overlap."""
+#         return self.recursive_splitter.split_text(text)
 
-    def chunk_by_tokens(self, text: str) -> list[str]:
-        """Split by token count using tokenizer."""
-        return self.token_splitter.split_text(text)
+#     def chunk_by_tokens(self, text: str) -> list[str]:
+#         """Split by token count using tokenizer."""
+#         return self.token_splitter.split_text(text)
 
-    def chunk_by_markdown(self, text: str) -> list[str]:
-        """Split Markdown, preserving code blocks and headings."""
-        return self.markdown_splitter.split_text(text)
+#     def chunk_by_markdown(self, text: str) -> list[str]:
+#         """Split Markdown, preserving code blocks and headings."""
+#         return self.markdown_splitter.split_text(text)
 
-class llamaChunker:
+# class llamaChunker:
 
-    def __init__(self, chunk_size: int = 600, chunk_overlap: int = 64):
-        self.recursive_splitter = LlamaRecursiveSplitter(
-            chunk_size=chunk_size, chunk_overlap=chunk_overlap
-        )
-        self.token_splitter = LlamaTokenSplitter(
-            chunk_size=chunk_size, chunk_overlap=chunk_overlap
-        )
+#     def __init__(self, chunk_size: int = 600, chunk_overlap: int = 64):
+#         # self.recursive_splitter = LlamaRecursiveSplitter(
+#         #     chunk_size=chunk_size, chunk_overlap=chunk_overlap
+#         # )
+#         self.token_splitter = LlamaTokenSplitter(
+#             chunk_size=chunk_size, chunk_overlap=chunk_overlap
+#         )
 
-    def chunk_by_recursive_chars(self, text: str) -> list[str]:
-        """LlamaIndex recursive character splitting."""
-        return self.recursive_splitter.split_text(text)
+#     def chunk_by_recursive_chars(self, text: str) -> list[str]:
+#         """LlamaIndex recursive character splitting."""
+#         return self.recursive_splitter.split_text(text)
 
-    def chunk_by_tokens(self, text: str) -> list[str]:
-        """LlamaIndex token-based splitting."""
-        return self.token_splitter.split_text(text)
+#     def chunk_by_tokens(self, text: str) -> list[str]:
+#         """LlamaIndex token-based splitting."""
+#         return self.token_splitter.split_text(text)
 
     # def chunk_by_words(self, text: str, chunk_size: int = 200, overlap: int = 20) -> list[str]:
     #     """Custom word-based chunking with overlap."""
@@ -300,13 +300,13 @@ class TextChunkingManager:
         self.chunkers = {
             "regex": RegexTextChunker,
             "semantic": SemanticSentenceChunker,
-            "langchainChar": langchainChunker,
-            "langchainRecChar": langchainChunker,
-            "langchainToken": langchainChunker,
-            "langchainMark": langchainChunker,
-            "llamaRecChar": llamaChunker,
-            "llamaToken": llamaChunker,
-            "llamaWords": llamaChunker
+            # "langchainChar": langchainChunker,
+            # "langchainRecChar": langchainChunker,
+            # "langchainToken": langchainChunker,
+            # "langchainMark": langchainChunker,
+            # "llamaRecChar": llamaChunker,
+            # "llamaToken": llamaChunker,
+            # "llamaWords": llamaChunker
         }
 
     def chunk_text(self, mechanism_type, parameters):
@@ -330,35 +330,35 @@ class TextChunkingManager:
                 overlap = int(parameters.get("overlap", 2))
                 return chunker.chunk_by_sentences(file_content, max_tokens, sim_threshold, overlap)
 
-            elif mechanism_type == "langchainChar":
-                text = parameters.get("file_content", "")
-                return chunker.chunk_by_chars(text)
+            # elif mechanism_type == "langchainChar":
+            #     text = parameters.get("file_content", "")
+            #     return chunker.chunk_by_chars(text)
 
-            elif mechanism_type == "langchainRecChar":
-                text = parameters.get("file_content", "")
-                return chunker.chunk_by_recursive_chars(text)
+            # elif mechanism_type == "langchainRecChar":
+            #     text = parameters.get("file_content", "")
+            #     return chunker.chunk_by_recursive_chars(text)
 
-            elif mechanism_type == "langchainToken":
-                text = parameters.get("file_content", "")
-                return chunker.chunk_by_tokens(text)
+            # elif mechanism_type == "langchainToken":
+            #     text = parameters.get("file_content", "")
+            #     return chunker.chunk_by_tokens(text)
 
-            elif mechanism_type == "langchainMark":
-                text = parameters.get("file_content", "")
-                return chunker.chunk_by_markdown(text)
+            # elif mechanism_type == "langchainMark":
+            #     text = parameters.get("file_content", "")
+            #     return chunker.chunk_by_markdown(text)
 
-            elif mechanism_type == "llamaRecChar":
-                text = parameters.get("file_content", "")
-                return chunker.chunk_by_recursive_chars(text)
+            # elif mechanism_type == "llamaRecChar":
+            #     text = parameters.get("file_content", "")
+            #     return chunker.chunk_by_recursive_chars(text)
 
-            elif mechanism_type == "llamaToken":
-                text = parameters.get("file_content", "")
-                return chunker.chunk_by_tokens(text)
+            # elif mechanism_type == "llamaToken":
+            #     text = parameters.get("file_content", "")
+            #     return chunker.chunk_by_tokens(text)
 
-            elif mechanism_type == "llamaWords":
-                text = parameters.get("file_content", "")
-                chunk_size = int(parameters.get("chunk_size", 200))
-                overlap = int(parameters.get("overlap", 20))
-                return chunker.chunk_by_words(text, chunk_size, overlap)
+            # elif mechanism_type == "llamaWords":
+            #     text = parameters.get("file_content", "")
+            #     chunk_size = int(parameters.get("chunk_size", 200))
+            #     overlap = int(parameters.get("overlap", 20))
+            #     return chunker.chunk_by_words(text, chunk_size, overlap)
 
         except Exception as e:
             print(f"Error during text chunking: {e}")
